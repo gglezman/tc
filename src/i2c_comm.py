@@ -26,7 +26,7 @@ class I2C_Comm:
         print("Inventory revision : {} ".format(*dev_info))
 
         reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_ADR, 2)
-        print("I2C address : 0x{} ".format(*dev_info))
+        print("I2C address : 0x{:02x} ".format(*dev_info))
 
         reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_TYPE, 2)
         print("Board Type : {} ".format(*dev_info))
