@@ -23,6 +23,9 @@ class TcGui:
         The init method creates the user frame and related objects.
         The run() function puts it up on the screen.
         """
+
+        self.i2c_comm = None
+
         self.root = tk.Tk()
         self.root.title("Train Control Platform")
         self.root.protocol("WM_DELETE_WINDOW", self.tc_exit)
@@ -37,8 +40,8 @@ class TcGui:
         self.notebook.pack(fill=tk.BOTH, expand=1)
 
         # create the tabs
-        self.frameS = ttk.Frame(self.notebook, relief=tk.RIDGE)
-        self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)
+        self.frameS = ttk.Frame(self.notebook, relief=tk.RIDGE)   # TODO These two will go away when I write
+        self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)   # classes for their respective pages
         # padding -> around the frame when the tab is selected
         self.notebook.add(ThrottleTab(self.notebook, relief=tk.RIDGE),
                           text="Throttle",
@@ -49,7 +52,13 @@ class TcGui:
         self.fill_switches_frame(self.frameS)
         self.fill_lights_frame(self.frameL)
 
-    def run(self):
+    def run(self, i2c_comm):
+        """Run the GUI
+
+        :param i2c_comm: class to communicate over the IC bus to controllers
+        :return: None
+        """
+        self.i2c_comm = i2c_comm
 
         # get screen width and height
         ws = self.root.winfo_screenwidth()  # width of the screen

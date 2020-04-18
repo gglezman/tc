@@ -8,6 +8,9 @@
 # This file contains constants that are used by the train control python scripts.
 #
 
+
+# the following section contains constants for the GUI
+
 SMALL_SCREEN = 0
 if SMALL_SCREEN:
     SCREEN_WIDTH = 800
@@ -39,3 +42,13 @@ else:
     slider_proportion = .70
     scale_slider_padding = (8, 3, 10)
     # print('small screen detected')
+
+# See I2C register definitions
+# Inventory data
+I2C_REG_INVENTORY_VERSION = 0
+I2C_REG_I2C_ADR = 1
+I2C_REG_BOARD_TYPE = 2
+I2C_REG_BOARD_DESCRIPTION = 3
+I2C_REG_BOARD_VERSION = 4
+I2C_REG_I2C_SW_VERSION = 10
+I2C_REG_APP_SW_VERSION = 20
