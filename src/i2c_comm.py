@@ -31,18 +31,22 @@ class I2C_Comm:
         reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_TYPE, 2)
         print("Board Type : {} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, 20)
+        reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, 20)   # TODO 20 ???
         description = ""
         for c in dev_info:
             if 32 <= c <= 128:
                 description += chr(c)
+        description = char_list_to_string(dev_info)
         print("Board Description : {}".format(description))
 
         reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_VERSION, 2)
         print("Board Version : {} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_SW_VERSION, 2)
+        reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_COMM_SW_VERSION, 2)
         print("I2C Version : {} ".format(*dev_info))
+
+        reg, dev_info = self.get_register(adr, tcc.I2C_REG_INVENTORY_SW_VERSION, 2)
+        print("Base Sw Version : {} ".format(*dev_info))
 
         reg, dev_info = self.get_register(adr, tcc.I2C_REG_APP_SW_VERSION, 2)
         print("Base Sw Version : {} ".format(*dev_info))
@@ -52,6 +56,14 @@ class I2C_Comm:
             print("99 data : {}".format(dev_info[0]))
         else:
             print("99 data: None****")
+
+    @staticmethod
+    def char_list_to_String(list):
+        string = ""
+        for c in char_list:
+            if 32 <= c <= 128:
+                string += chr(c)
+        return string
 
     def get_register(self, adr, reg, length):
         """
