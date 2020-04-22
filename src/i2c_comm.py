@@ -18,38 +18,53 @@ class I2C_Comm:
     def __init__(self, bus):
         self.smbus = SMBus(bus=bus)
         sleep(1)   # give the bus a chance to settle
-        print("Bus settled")
+        #print("Bus settled")
 
     def get_device_info(self, adr):
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_INVENTORY_VERSION, 2)
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_INVENTORY_VERSION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_VERSION_LEN)
         print("Inventory revision : {} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_ADR, 2)
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_I2C_ADR,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_ADR_LEN)
         print("I2C address : 0x{:02x} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_TYPE, 2)
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_BOARD_TYPE,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_TYPE_LEN)
         print("Board Type : {} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, 20)   # TODO 20 ???
-        description = ""
-        for c in dev_info:
-            if 32 <= c <= 128:
-                description += chr(c)
-        description = char_list_to_string(dev_info)
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_BOARD_DESCRIPTION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_DESCRIPTION_LEN)
+        description = self.char_list_to_string(dev_info)
         print("Board Description : {}".format(description))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_VERSION, 2)
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_BOARD_VERSION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_VERSION_LEN)
         print("Board Version : {} ".format(*dev_info))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_COMM_SW_VERSION, 2)
-        print("I2C Version : {} ".format(*dev_info))
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_I2C_COMM_SW_VERSION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_COMM_SW_VERSION_LEN)
+        i2c_comm_version = self.char_list_to_string(dev_info)
+        print("I2C Comm Sw Version : {} ".format(i2c_comm_version))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_INVENTORY_SW_VERSION, 2)
-        print("Base Sw Version : {} ".format(*dev_info))
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_INVENTORY_SW_VERSION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_SW_VERSION_LEN)
+        inv_sw_version = self.char_list_to_string(dev_info)
+        print("Inventory Sw Version : {} ".format(inv_sw_version))
 
-        reg, dev_info = self.get_register(adr, tcc.I2C_REG_APP_SW_VERSION, 2)
-        print("Base Sw Version : {} ".format(*dev_info))
+        reg, dev_info = self.get_register(adr,
+                                          tcc.I2C_REG_APP_SW_VERSION,
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_APP_SW_VERSION_LEN)
+        app_sw_version = self.char_list_to_string(dev_info)
+        print("Application Sw Version : {} ".format(app_sw_version))
 
         reg, dev_info = self.get_register(adr, 99, 2)
         if len(dev_info) > 0:
@@ -57,9 +72,8 @@ class I2C_Comm:
         else:
             print("99 data: None****")
 
-    @staticmethod
-    def char_list_to_String(list):
-        string = ""
+    def char_list_to_string(self, char_list):
+        string = " "
         for c in char_list:
             if 32 <= c <= 128:
                 string += chr(c)
@@ -67,7 +81,6 @@ class I2C_Comm:
 
     def get_register(self, adr, reg, length):
         """
-
         :param adr:
         :param reg:
         :param length:
