@@ -5,8 +5,8 @@
 #
 # Copyright (c) 2020 G.Glezman.  All Rights Reserved.
 #
-# This file contains classes that are used by the cash flow python script
-# to present a GUI to the cash flow report.
+# This file contains classes that are used by the train control python script.
+# They implement the GUI to the Throttle mechanism.
 #
 
 import tkinter as tk

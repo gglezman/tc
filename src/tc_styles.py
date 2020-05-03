@@ -54,6 +54,9 @@ def set_styles():
     ##############################
     # Label Styles
     ##############################
+    s.configure("RidgeReliefML.TLabel", relief=tk.RIDGE, borderwidth=3, padding=(3,3,3,3),
+                anchor=tk.CENTER, wraplength=100, justify=tk.CENTER)
+
     s.configure('Centered.TLabel', justify='center', anchor='center')
     s.configure('Medium.TLabel', padding=(2, 2))
     # not sure if anchor in the following works

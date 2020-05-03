@@ -22,14 +22,6 @@ def main():
     gui = tc_gui.TcGui()
 
     i2c_bus = i2c_comm.I2C_Comm(bus_id)
-    dev_list = i2c_bus.get_controller_list()
-    print("DevList = {}".format(dev_list))
-
-    for dev in dev_list:
-        print("Collect Board info from {}".format(dev))
-        adr = int(dev, base=16)
-        info = i2c_bus.get_device_info(adr)
-        # print(info)
 
     gui.run(i2c_bus)
 

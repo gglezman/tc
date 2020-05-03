@@ -13,6 +13,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
 from throttle import ThrottleTab
+from inventory import InventoryTab
 import tc_styles
 
 
@@ -42,12 +43,14 @@ class TcGui:
         # create the tabs
         self.frameS = ttk.Frame(self.notebook, relief=tk.RIDGE)   # TODO These two will go away when I write
         self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)   # classes for their respective pages
+
         # padding -> around the frame when the tab is selected
-        self.notebook.add(ThrottleTab(self.notebook, relief=tk.RIDGE),
-                          text="Throttle",
-                          padding=tcc.tab_padding)
+        self.notebook.add(ThrottleTab(self.notebook, relief=tk.RIDGE), text="Throttle", padding=tcc.tab_padding)
         self.notebook.add(self.frameS, text="Switches", padding=tcc.tab_padding)
         self.notebook.add(self.frameL, text="Lights", padding=tcc.tab_padding)
+
+        self.inventoryTab = InventoryTab(self.notebook, relief=tk.RIDGE)
+        self.notebook.add(self.inventoryTab, text="Inventory", padding=tcc.tab_padding)
 
         self.fill_switches_frame(self.frameS)
         self.fill_lights_frame(self.frameL)
@@ -72,6 +75,8 @@ class TcGui:
 
         self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))
 
+        self.update_inventory()
+
         self.root.mainloop()
 
     def fill_switches_frame(self, switches_frame):
@@ -79,6 +84,24 @@ class TcGui:
 
     def fill_lights_frame(self, lights_frame):
         None
+
+    def update_inventory(self):
+        """USe the I2C_Comm services to collwect inventory information then feed it to the InventoryTab for display.
+
+        This function runs periodically in case a new device is plugged in.
+
+        :return: None
+        """
+        dev_list = self.i2c_comm.get_controller_list()
+
+        board_info = []
+        for dev in dev_list:
+            adr = int(dev, base=16)
+            board_info.append(self.i2c_comm.get_device_info(adr))
+
+        self.inventoryTab.update_inventory(board_info)
+
+        self.root.after(10000, self.update_inventory)
 
     def tc_exit(self):
         self.root.destroy()
