@@ -55,7 +55,7 @@ def set_styles():
     # Label Styles
     ##############################
     s.configure("RidgeReliefML.TLabel", relief=tk.RIDGE, borderwidth=3, padding=(3,3,3,3),
-                anchor=tk.CENTER, wraplength=100, justify=tk.CENTER)
+                anchor=tk.CENTER, wraplength=110, justify=tk.CENTER, font=("TkDefaultFont",14,"normal"))
 
     s.configure('Centered.TLabel', justify='center', anchor='center')
     s.configure('Medium.TLabel', padding=(2, 2))
@@ -94,7 +94,9 @@ def set_styles():
     ##############################
     # Button Styles
     ##############################
-    s.configure('TButton', padding=(1, 3))
+    s.configure('BiggerText.TButton', font=("TkDefaultFont", 14, "normal"), borderwidth=8)
+
+    #s.configure('TButton', padding=(1, 3))
     s.configure('Medium.TButton', padding=(2, 2))
     s.configure('MediumThin.TButton', padding=(1, 1))
     s.configure('Thin.TButton', padding=(0, 0))

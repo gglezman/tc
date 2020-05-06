@@ -49,7 +49,7 @@ class TcGui:
         self.notebook.add(self.frameS, text="Switches", padding=tcc.tab_padding)
         self.notebook.add(self.frameL, text="Lights", padding=tcc.tab_padding)
 
-        self.inventoryTab = InventoryTab(self.notebook, relief=tk.RIDGE)
+        self.inventoryTab = InventoryTab(self, self.notebook, relief=tk.RIDGE)
         self.notebook.add(self.inventoryTab, text="Inventory", padding=tcc.tab_padding)
 
         self.fill_switches_frame(self.frameS)
@@ -86,7 +86,7 @@ class TcGui:
         None
 
     def update_inventory(self):
-        """USe the I2C_Comm services to collwect inventory information then feed it to the InventoryTab for display.
+        """USe the I2C_Comm services to collect inventory information then feed it to the InventoryTab for display.
 
         This function runs periodically in case a new device is plugged in.
 
@@ -101,7 +101,7 @@ class TcGui:
 
         self.inventoryTab.update_inventory(board_info)
 
-        self.root.after(10000, self.update_inventory)
+        #self.root.after(100000, self.update_inventory)
 
     def tc_exit(self):
         self.root.destroy()

@@ -23,13 +23,13 @@ class I2C_Comm:
 
     def get_device_info(self, adr):
 
-        board_info = {"inventoryVersion":0, "i2cAdr":0, "boardType":0, "boardDescriptionb":"unknown",
-                      "boardVersion":0, "i2cCommSwVersion":"unknown","inventorySwVersion":"unknown","appSwVersion":"unknown"}
+        board_info = {"inventoryVersion":0, "i2cAddress":0, "boardType":0, "boardDescription":"unknown",
+                      "boardVersion":0, "i2cCommSwVersion":"unknown","inventorySwVersion":"unknown", "applicationSwVersion":"unknown"}
 
         reg, dev_info = self.get_register(adr,
                                           tcc.I2C_REG_INVENTORY_VERSION,
                                           tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_VERSION_LEN)
-        if  reg >= 0 and dev_info[0] == 1:
+        if  reg == tcc.I2C_REG_INVENTORY_VERSION and dev_info[0] == 1:
             # ####################################
             # inventory structure version 1
             # ####################################
@@ -51,7 +51,7 @@ class I2C_Comm:
             reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_VERSION_LEN)
             if reg > 0:
                 board_info["boardVersion"] = dev_info[0]
-                print("brd version {}".format(board_info["boardVersion"]))
+                #print("brd version {}".format(board_info["boardVersion"]))
             reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_COMM_SW_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_COMM_SW_VERSION_LEN)
             if reg > 0:
                 board_info["i2cCommSwVersion"] = self.char_list_to_string(dev_info)
@@ -70,7 +70,7 @@ class I2C_Comm:
                 print("99 data : {}".format(dev_info[0]))
             else:
                 print("99 data: None****")
-
+        #print(board_info)
         return board_info
 
     def char_list_to_string(self, char_list):
@@ -89,12 +89,16 @@ class I2C_Comm:
         """
         cmd = -1            # Assume error return
         reg_data = []
-        try:
-            reg_data = self.smbus.read_i2c_block_data(adr, reg, length)
-            if len(reg_data) > 0:
-                cmd = reg_data.pop(0)
-        except IOError:
-            print("Error on adr {}/ reg {}".format(adr, reg))
+
+        for retry in range(0,4):
+            try:
+                reg_data = self.smbus.read_i2c_block_data(adr, reg, length)
+                if len(reg_data) > 0:
+                    cmd = reg_data.pop(0)
+                    break
+            except IOError:
+                print("Error on adr {}/ reg {}".format(adr, reg))
+
         return cmd, reg_data
 
     @staticmethod
@@ -106,10 +110,11 @@ class I2C_Comm:
         arduino_list = []
 
         cmd = "i2cdetect -y 1"
-        run_cmd = ["i2cdetect", "-y", "1"]
+        #run_cmd = ["i2cdetect", "-y", "1"]   use when shell=False
+        run_cmd = "i2cdetect -y 1"
 
         try:
-            i2c_detect_output = subprocess.run(run_cmd, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+            i2c_detect_output = subprocess.run(run_cmd, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
 
             i2c_detect_output.check_returncode()
             i2c_rows = i2c_detect_output.stdout.splitlines()
