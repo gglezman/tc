@@ -26,6 +26,7 @@ class TcGui:
         """
 
         self.i2c_comm = None
+        self.board_inventory = []
 
         self.root = tk.Tk()
         self.root.title("Train Control Platform")
@@ -62,6 +63,8 @@ class TcGui:
         :return: None
         """
         self.i2c_comm = i2c_comm
+        self.board_inventory = self.collect_inventory()
+        self.inventoryTab.update_inventory(self.board_inventory)
 
         # get screen width and height
         ws = self.root.winfo_screenwidth()  # width of the screen
@@ -75,8 +78,6 @@ class TcGui:
 
         self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))
 
-        self.update_inventory()
-
         self.root.mainloop()
 
     def fill_switches_frame(self, switches_frame):
@@ -85,24 +86,24 @@ class TcGui:
     def fill_lights_frame(self, lights_frame):
         None
 
-    def update_inventory(self):
-        """USe the I2C_Comm services to collect inventory information then feed it to the InventoryTab for display.
+    def collect_inventory(self):
+        """Use the I2C_Comm services to collect inventory information.
 
-        This function runs periodically in case a new device is plugged in.
+        This function uses the I2C bus to collect inventory information from all connect
+        board controllers.
 
-        :return: None
+        :return: board_inventory - a list of dictionary entries describing each board in the system.
         """
         dev_list = self.i2c_comm.get_controller_list()
 
-        board_info = []
+        board_inventory = []
         for dev in dev_list:
             adr = int(dev, base=16)
-            board_info.append(self.i2c_comm.get_device_info(adr))
+            board_inventory.append(self.i2c_comm.get_device_info(adr))
 
-        self.inventoryTab.update_inventory(board_info)
-
+        return board_inventory
         #self.root.after(100000, self.update_inventory)
 
     def tc_exit(self):
-        self.root.destroy()
+        #self.root.destroy()  #  TcGui: object has no attribute 'children'
         exit()

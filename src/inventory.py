@@ -19,17 +19,14 @@ class InventoryTab(ttk.Frame):
     def __init__(self, master, notebook, **kwargs):
         """The inventory tab show information on all the sub-ordinante controllers in the system.
 
-        :param master: Notebook holding the Inventory frame (i.e. TcGui)
+        :param master: top level object (i.e. TcGui)
+        :param notebook: Notebook holding the Inventory frame (i.e. TcGui)
         :param kwargs:
         """
         ttk.Frame.__init__(self, notebook, style='DarkGray.TFrame', padding=(10,40,10,10), **kwargs)
         self.master = master
 
-        row = 0
-        refreshButt = ttk.Button(self, text="Refresh Inventory", style="BiggerText.TButton", command=self.trigger_update)
-        refreshButt.grid(row=row, column=0, sticky=tk.W)
-
-        row += 1
+        row  = 0
         ttk.Label(self, text="Board Description", style="RidgeReliefML.TLabel",width=16)\
             .grid(row=row, column=0, sticky="nsew")
         ttk.Label(self, text="I2C Address", style="RidgeReliefML.TLabel", width=10)\
@@ -40,9 +37,6 @@ class InventoryTab(ttk.Frame):
         ttk.Label(self, text="I2C_Comm Sw Version", style="RidgeReliefML.TLabel").grid(row=row, column=5, sticky="nsew")
         ttk.Label(self, text="Inventory Sw Version", style="RidgeReliefML.TLabel").grid(row=row, column=6, sticky="nsew")
         ttk.Label(self, text="Application Version", style="RidgeReliefML.TLabel").grid(row=row, column=7, sticky="nsew")
-
-    def trigger_update(self):
-        self.master.update_inventory()
 
     def update_inventory(self, inventory):
         # find some way to clear out rows 1 - n
