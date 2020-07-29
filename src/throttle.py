@@ -16,12 +16,15 @@ import tc_styles
 
 
 class ThrottleTab(ttk.Frame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, i2c_comm, **kwargs):
         """Throttle Frame contains Throttles for 2 locomotive
 
         :param master: Notebook holding the Throttle frame
+        :param i2c_comm - I2C_Comm object
         :param kwargs:
         """
+        self.i2c_comm = i2c_comm
+
         ttk.Frame.__init__(self, master, style='DarkGray.TFrame', **kwargs)
         self.throttle_A = Throttle(self, 'Locomotive A')
         self.throttle_A.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
@@ -42,6 +45,9 @@ class Throttle(ttk.Frame):
         :param throttle_tab:
         :param title:
         """
+
+        self.parent = throttle_tab
+
         ttk.Frame.__init__(self, throttle_tab,
                            style='MediumGray.TFrame',
                            **kwargs)
@@ -58,7 +64,7 @@ class Throttle(ttk.Frame):
         self.power_control.grid(row=1, column=0, rowspan=40, sticky='nsew')
 
         # Button Panel
-        self.button_panel = ButtonPanel(self, self)   # fixme3 self, self ?
+        self.button_panel = ButtonPanel(self)
         self.button_panel.grid(row=1, column=1, sticky='nwe')
 
         # Speedometer Slider
@@ -87,23 +93,26 @@ class Throttle(ttk.Frame):
         if state == 'on':
             self.power_control.config_scale('active')
             self.speedometer.config_scale('active')
+
+            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, [1]) ##  this will never work: A/B
         else:
             self.power_control.config_scale('disabled')
             self.speedometer.config_scale('disabled')
 
+            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, 1, 0)
+
 
 class ButtonPanel(ttk.Frame):
-    def __init__(self, parent, locomotive_frame, **kwargs):
+    def __init__(self, throttle_frame, **kwargs):
         """Panel to hold control buttons (power, direction, momentum)
 
-        :param parent: invoking object (ie Throttle class)
-        :param locomotive_frame:
+        :param throttle_frame:
         :param kwargs:
         """
-        ttk.Frame.__init__(self, locomotive_frame,
+        ttk.Frame.__init__(self, throttle_frame,
                            style='MediumGray.TFrame',
                            **kwargs)
-        self.parent = parent
+        self.throttle_frame = throttle_frame
         self.power_on = False
         self.momentum = False
         self.direction = 'forward'     # or reverse
@@ -159,14 +168,14 @@ class ButtonPanel(ttk.Frame):
             self.config_momentum('disabled')
             self.config_direction('disabled')
             # tell Throttle the power is off
-            self.parent.power_state('off')
+            self.throttle_frame.power_state('off')
         else:
             self.power_on = True
             self.config_master_power('on')
             self.config_momentum('off')
             self.config_direction('forward')
             # Tell Throttle the power is on
-            self.parent.power_state('on')
+            self.throttle_frame.power_state('on')
 
     def config_master_power(self, state):
         if state == 'on':
@@ -232,10 +241,10 @@ class ButtonPanel(ttk.Frame):
 
 
 class ScaledSlider(ttk.Frame):
-    def __init__(self, master, title, tracking_only=False, **kwargs):
+    def __init__(self, throttle_frame, title, tracking_only=False, **kwargs):
         """ Calibrated slider
 
-        :param master: Locomotive Frame
+        :param throttle: frame to place the slider in
         :param title:  Title over slider
         :param tracking_only: user can not move this slider
         :param kwargs:
@@ -243,11 +252,11 @@ class ScaledSlider(ttk.Frame):
         The frame is padded to give a background to the labels/slider
         """
         ttk.Frame.__init__(self,
-                           master,
+                           throttle_frame,
                            style='Disabled.TFrame',
                            # padding=('1m','2m','3m','1m'),
                            **kwargs)
-        self.master = master
+        self.throttle_frame = throttle_frame
         self.tracking_only = tracking_only
         self.scale_value = tk.DoubleVar(self)
 
@@ -288,7 +297,7 @@ class ScaledSlider(ttk.Frame):
         :param event:
         :return:
         """
-        self.master.power_setting(self.scale.get())
+        self.throttle_frame.power_setting(self.scale.get())
 
     def set_reading(self, value):
         """USed to set current value for tracking_only

@@ -18,7 +18,7 @@ DISABLED_COLOR = 'gray75'
 GRAY_BACKGROUND = 'gray75'
 GRAY_BORDER = 'gray72'
 
-
+# TODO - clean this out of unused styles
 def set_styles():
 
     s = ttk.Style()
@@ -54,6 +54,9 @@ def set_styles():
     ##############################
     # Label Styles
     ##############################
+    s.configure('MultiLine.TLabel', relief=tk.RIDGE, borderwidth=2,
+                width=15, anchor=tk.CENTER,
+               wraplength=100, justify=tk.CENTER)
     s.configure("RidgeReliefML.TLabel", relief=tk.RIDGE, borderwidth=3, padding=(3,3,3,3),
                 anchor=tk.CENTER, wraplength=110, justify=tk.CENTER, font=("TkDefaultFont",14,"normal"))
 
@@ -118,11 +121,13 @@ def set_styles():
     # Entry Styles
     ##############################
     s.configure('Special.TEntry')
+    s.configure('Padded.TEntry', padding=(4, 4))
 
     ##############################
     # Combobox Style
     ##############################
     # width in the following does not work
+    s.configure('Padded.TCombobox', padding=(4, 4))
     s.configure('Common.TCombobox', width=9)
     s.configure('Special.TCombobox')
 

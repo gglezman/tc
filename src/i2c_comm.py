@@ -24,11 +24,12 @@ class I2C_Comm:
     def get_device_info(self, adr):
 
         board_info = {"inventoryVersion":0, "i2cAddress":0, "boardType":0, "boardDescription":"unknown",
-                      "boardVersion":0, "i2cCommSwVersion":"unknown","inventorySwVersion":"unknown", "applicationSwVersion":"unknown"}
+                      "boardVersion":0, "i2cCommSwVersion":"unknown","inventorySwVersion":"unknown",
+                      "applicationSwVersion":"unknown"}
 
         reg, dev_info = self.get_register(adr,
                                           tcc.I2C_REG_INVENTORY_VERSION,
-                                          tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_VERSION_LEN)
+                                          tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_VERSION_LEN )
         if  reg == tcc.I2C_REG_INVENTORY_VERSION and dev_info[0] == 1:
             # ####################################
             # inventory structure version 1
@@ -44,7 +45,7 @@ class I2C_Comm:
                 board_info["boardType"] = dev_info[0]
             #
             reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_DESCRIPTION_LEN)
-            description = self.char_list_to_string(dev_info)
+            #description = self.char_list_to_string(dev_info)
             if reg > 0:
                 board_info["boardDescription"] = self.char_list_to_string(dev_info)
 
@@ -57,7 +58,7 @@ class I2C_Comm:
                 board_info["i2cCommSwVersion"] = self.char_list_to_string(dev_info)
 
             reg, dev_info = self.get_register(adr, tcc.I2C_REG_INVENTORY_SW_VERSION,  tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_SW_VERSION_LEN)
-            inv_sw_version = self.char_list_to_string(dev_info)
+            #inv_sw_version = self.char_list_to_string(dev_info)
             if reg > 0:
                 board_info["inventorySwVersion"] = self.char_list_to_string(dev_info)
 
@@ -73,33 +74,79 @@ class I2C_Comm:
         #print(board_info)
         return board_info
 
-    def char_list_to_string(self, char_list):
+    def char_list_to_string(self, char_list):   # TODO - rewrite this !!!
         string = " "
         for c in char_list:
             if 32 <= c <= 128:
                 string += chr(c)
         return string
 
-    def get_register(self, adr, reg, length):
+    def get_register(self, adr, reg, data_length):
         """
-        :param adr:
-        :param reg:
-        :param length:
-        :return: regId or -1 (on error), remaining_bytes read
+        :param adr: I2C Bus address
+        :param reg: board register
+        :param length: of data to read (not counting the checksum)
+        :return: reg or -1 (on error),
+                 reg_data (remaining bytes read)
         """
         cmd = -1            # Assume error return
         reg_data = []
-
+        length = data_length + tcc.I2C_CHECKSUM_LEN
         for retry in range(0,4):
             try:
+                #print("adr {}, reg {}, len {}".format(adr, reg, length))    # take me out
                 reg_data = self.smbus.read_i2c_block_data(adr, reg, length)
-                if len(reg_data) > 0:
-                    cmd = reg_data.pop(0)
-                    break
+                #print("len {} length {}".format(len(reg_data), length))      # take me out
+                if len(reg_data) == length:
+                    if self.validateChecksum(reg_data) == 0:
+                        cmd = reg_data.pop(0)
+                        if cmd == reg:
+                            break
+                    else:
+                        print("get_register checksum error {}".format(self.validateChecksum(reg_data)))
+                else:
+                    print("get_register blipped: len:{}".format(length))
             except IOError:
-                print("Error on adr {}/ reg {}".format(adr, reg))
+                print("Error get _register at adr {} / reg {}".format(adr, reg))
 
         return cmd, reg_data
+
+    def set_register(self, adr, reg, send_data):
+        # TODO - yake this out
+        print("set reg {} / {}  / {}".format(adr, reg, send_data))
+        try:
+            self.smbus.write_i2c_block_data(adr, reg, send_data)
+        except IOError:
+            print("Error setRegister at adr {} / reg {}".format(adr, reg))
+
+    def get_byte_reg(self, adr, reg):
+        """Read one byte of data from the specified register at the specified address.
+
+        This would be a useful function for collecting inventory data except the Arduino
+        code would need to be rewritten. The Arduino code sends multiple bytes back, starting
+        with the regId. It would need to send only the requested data.
+
+        To make use of this method, the Ardino code would need to send a single byte back
+        in response to a request. Maybe later there will be registers where I need to do this.
+        This method would be appropriate where higher performance is required.
+
+        :param adr:
+        :param reg:
+        :return: reg or -1 on error
+                 reg_data
+        """
+        for retry in range (0,4):
+            try:
+                reg_data = self.smbus.read_byte_data(adr, reg)
+                return_reg = reg
+                break
+            except IOError:
+                print("Error get_byte_reg at adr {} / reg {}".format(adr, reg))
+                # Note the following values may be overwritten by a successful retry
+                return_reg = -1  # assume error
+                reg_data = 0
+
+        return return_reg, reg_data
 
     @staticmethod
     def get_controller_list():
@@ -129,20 +176,6 @@ class I2C_Comm:
         except subprocess.CalledProcessError:
             print("CallProcessError encountered")
 
-        """
-        i2c_detect_output = os.popen(cmd).read()
-
-        i2c_rows = i2c_detect_output.splitlines()
-        # delete the top row, its the column headings
-        del i2c_rows[0]
-        for row in i2c_rows:
-            adr_list = row.split()
-            # delete the row identifier
-            del adr_list[0]
-            for adr in adr_list:
-                if adr != '--':
-                    arduino_list.append(adr)
-        """
         return arduino_list
 
     def loopback_test(self, adr):
@@ -167,3 +200,12 @@ class I2C_Comm:
             sleep(0.001)
 
         return messages_to_send, errors
+
+    @staticmethod
+    def validateChecksum(list):
+        ''' Return zero is the checksum is valid'''
+
+        checksum = 0
+        for element in list:
+            checksum += element
+        return checksum % 256

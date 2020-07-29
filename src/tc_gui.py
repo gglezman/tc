@@ -14,18 +14,19 @@ import tkinter.ttk as ttk
 import tc_constants as tcc
 from throttle import ThrottleTab
 from inventory import InventoryTab
+from raspArduinoTest import RaspArduinoTestTab
 import tc_styles
 
 
 class TcGui:
-    def __init__(self):
+    def __init__(self, i2c_comm):
         """Create the Train control GUI
 
         The init method creates the user frame and related objects.
         The run() function puts it up on the screen.
         """
 
-        self.i2c_comm = None
+        self.i2c_comm = i2c_comm
         self.board_inventory = []
 
         self.root = tk.Tk()
@@ -46,25 +47,30 @@ class TcGui:
         self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)   # classes for their respective pages
 
         # padding -> around the frame when the tab is selected
-        self.notebook.add(ThrottleTab(self.notebook, relief=tk.RIDGE), text="Throttle", padding=tcc.tab_padding)
+        self.notebook.add(ThrottleTab(self.notebook, i2c_comm, relief=tk.RIDGE), text="Throttle", padding=tcc.tab_padding)
         self.notebook.add(self.frameS, text="Switches", padding=tcc.tab_padding)
         self.notebook.add(self.frameL, text="Lights", padding=tcc.tab_padding)
 
         self.inventoryTab = InventoryTab(self, self.notebook, relief=tk.RIDGE)
         self.notebook.add(self.inventoryTab, text="Inventory", padding=tcc.tab_padding)
 
+        self.raspArduinoTestTab = RaspArduinoTestTab(self, self.notebook, relief=tk.RIDGE)
+        self.frameT = ttk.Frame(self.notebook, relief=tk.RIDGE)   # TODO These two will go away when I write
+        self.notebook.add(self.raspArduinoTestTab, text="Test", padding=tcc.tab_padding)
+        #self.notebook.add(self.frameT, text="Test", padding=tcc.tab_padding)
+
         self.fill_switches_frame(self.frameS)
         self.fill_lights_frame(self.frameL)
 
-    def run(self, i2c_comm):
+    def run(self):
         """Run the GUI
 
         :param i2c_comm: class to communicate over the IC bus to controllers
         :return: None
         """
-        self.i2c_comm = i2c_comm
         self.board_inventory = self.collect_inventory()
         self.inventoryTab.update_inventory(self.board_inventory)
+        self.raspArduinoTestTab.update_inventory(self.board_inventory)
 
         # get screen width and height
         ws = self.root.winfo_screenwidth()  # width of the screen

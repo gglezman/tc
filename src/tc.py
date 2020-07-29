@@ -19,11 +19,11 @@ def main():
     # Run the GUI
     # #########################################
 
-    gui = tc_gui.TcGui()
-
     i2c_bus = i2c_comm.I2C_Comm(bus_id)
 
-    gui.run(i2c_bus)
+    gui = tc_gui.TcGui(i2c_bus)
+
+    gui.run()
 
 
 if __name__ == "__main__":
