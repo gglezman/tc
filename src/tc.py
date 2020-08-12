@@ -8,7 +8,7 @@
 #
 
 import tc_gui
-from time import sleep
+# from time import sleep
 import i2c_comm as i2c_comm
 
 bus_id = 1

@@ -54,10 +54,8 @@ class TcGui:
         self.inventoryTab = InventoryTab(self, self.notebook, relief=tk.RIDGE)
         self.notebook.add(self.inventoryTab, text="Inventory", padding=tcc.tab_padding)
 
-        self.raspArduinoTestTab = RaspArduinoTestTab(self, self.notebook, relief=tk.RIDGE)
-        self.frameT = ttk.Frame(self.notebook, relief=tk.RIDGE)   # TODO These two will go away when I write
+        self.raspArduinoTestTab = RaspArduinoTestTab(self, self.notebook, self.root, self.i2c_comm, relief=tk.RIDGE)
         self.notebook.add(self.raspArduinoTestTab, text="Test", padding=tcc.tab_padding)
-        #self.notebook.add(self.frameT, text="Test", padding=tcc.tab_padding)
 
         self.fill_switches_frame(self.frameS)
         self.fill_lights_frame(self.frameL)

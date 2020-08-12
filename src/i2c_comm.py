@@ -19,7 +19,6 @@ class I2C_Comm:
     def __init__(self, bus):
         self.smbus = SMBus(bus=bus)
         sleep(1)   # give the bus a chance to settle
-        #print("Bus settled")
 
     def get_device_info(self, adr):
 
@@ -68,7 +67,8 @@ class I2C_Comm:
 
             reg, dev_info = self.get_register(adr, 99, 2)
             if len(dev_info) > 0:
-                print("99 data : {}".format(dev_info[0]))
+                #print("99 data : {}".format(dev_info[0]))
+                print("99 data : {}".format(dev_info))
             else:
                 print("99 data: None****")
         #print(board_info)
@@ -99,7 +99,7 @@ class I2C_Comm:
                 #print("len {} length {}".format(len(reg_data), length))      # take me out
                 if len(reg_data) == length:
                     if self.validateChecksum(reg_data) == 0:
-                        cmd = reg_data.pop(0)
+                        cmd = reg_data.pop(0)        # todo - checksum is still attached !
                         if cmd == reg:
                             break
                     else:
@@ -177,6 +177,42 @@ class I2C_Comm:
             print("CallProcessError encountered")
 
         return arduino_list
+
+    def block_read_test(self, adr, reg):
+        """Execute a block read test on the given address / register
+
+        A loopback test consists of the following message sent 256 times
+        to the given adr:
+             block data read to
+             - register 'reg'
+
+        The  return value is a tuple (messagesSent, readExceptions, data_mismatches).
+        """
+        messages_to_send = 256
+        read_exception = 0
+        data_mismatch = 0
+        length = 3
+        for i in range(messages_to_send):
+            try:
+                read_data = self.smbus.read_i2c_block_data(adr, reg, length)
+                if len(read_data) == length:
+                    if self.validateChecksum(read_data) == 0:
+                        if read_data[0] != reg:
+                            data_mismatch += 1
+                            print("RegId read error")
+                    else:
+                        data_mismatch += 1
+                        print("Checksum error: {} {} ".format(read_data[1], read_data[2]))
+                else:
+                    data_mismatch += 1
+                    print("Length read error")
+            except IOError:
+                read_exception += 1
+                print("Read IOerror at adr {}".format(adr))
+                #print("Read IOerror at adr {} on attempt # {}".format(adr, i))
+            sleep(0.00001)
+
+        return messages_to_send, read_exception, data_mismatch
 
     def loopback_test(self, adr):
         """Execute a loopback test on the given address

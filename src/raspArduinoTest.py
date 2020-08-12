@@ -13,70 +13,70 @@ import os
 import tkinter as tk
 import tkinter.ttk as ttk
 #from I2C_Transport import I2C_Transport
-
+from tkinter.font import Font
 
 class RaspArduinoTestTab(ttk.Frame):
-    def __init__(self, master, notebook, **kwargs):
+    def __init__(self, master, notebook, root, i2c_comm, **kwargs):
         """Run one or more tests against the given list of Arduinos
 
           :param master: top level object (i.e. TcGui)
           :param notebook: Notebook holding the RasArduinoTest frame (i.e. TcGui)
           :param kwargs:
           """
-
-        
         ttk.Frame.__init__(self, notebook, style='DarkGray.TFrame', padding=(10, 40, 10, 10), **kwargs)
         self.master = master
+        self.root = root
+        self.i2c_comm = i2c_comm
 
-        #self.i2c_bus = i2c_bus
-        #self.arduino_list = arduino_list
-        self.status_widgets = {}  # test result widgets
+        self.textFont = Font(family="Helvetica", size=12)
+        self.inventory = []                            # list of all i2c devices on the bus
+        self.status_widgets = {}                       # test result widgets
         self.test_running = False
         self.runButt = None
         self.iter_count = None
         self.exitButt = None
 
         # Create a frame to hold the test data
-        self.arduino_frame = self.add_frame(self)
+        self.arduino_frame = self.add_label_frame(self, "Boards Found", fill=tk.X, expand=0)
         row = 0
         col = 0
 
-        ttk.Button(self.arduino_frame, text="Arduino Address", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="I2C\nAddress", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
         col += 1
-        ttk.Button(self.arduino_frame, text="Total Transmissions", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="Total\nTransmissions", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
         col += 1
-        ttk.Button(self.arduino_frame, text="Read Exceptions", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="Read\nExceptions", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
         col += 1
-        ttk.Button(self.arduino_frame, text="Write Exceptions", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="Write\nExceptions", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
         col += 1
-        ttk.Button(self.arduino_frame, text="Data Mismatches", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="Data\nMismatches", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
         col += 1
-        ttk.Button(self.arduino_frame, text="Uncorrected Errors", style='MultiLine.TLabel'). \
-            grid(row=row, column=col, sticky='W')
+        ttk.Button(self.arduino_frame, text="Uncorrected\nErrors", style='RidgeReliefML.TLabel'). \
+            grid(row=row, column=col, sticky='nsew')
 
     def update_inventory(self, inventory):
-        pass
+        self.inventory = inventory
+
         # add a row to the frame for each Arduino found
         self.create_arduino_rows(self.arduino_frame, inventory)
 
         # Add buttons in bottom row
         # Create a frame to hold the test data
-        self.button_frame = self.add_frame(self)
+        self.button_frame = self.add_label_frame(self, "Test Control Options",fill=tk.X, expand=0, x_pady=10)
         self.add_control_buttons(self.button_frame)
-
-        #self.win.mainloop()
 
     def run(self):
         """Start the test running"""
 
         self.test_running = True
         self.runButt.configure(text="Running")
-        self.win.update_idletasks()
+        #  Todo - do I need the following line ?
+        self.root.update_idletasks()
 
         # read the test selection combo box
         active_test = self.testSelect.get()
@@ -99,34 +99,34 @@ class RaspArduinoTestTab(ttk.Frame):
 
     def create_arduino_rows(self, frame, inventory):
         """Create a row for each Arduino in the list."""
-        col_width = 15
+        col_width = 10
         row = 1
         col = 0
 
         for arduino in inventory:
             arduino_adr = arduino["i2cAddress"]
             col = 0
-            ttk.Label(frame, text="0x{:02x}".format(arduino_adr)).grid(row=row, column=col)
+            ttk.Label(frame, text="0x{:02x}".format(arduino_adr),font=self.textFont).grid(row=row, column=col)
             col += 1
-            tot_transmit_box = ttk.Entry(frame, w=col_width)  # transmissions
+            tot_transmit_box = ttk.Entry(frame, w=col_width,font=self.textFont, justify=tk.RIGHT)  # transmissions
             tot_transmit_box.insert(0, 0)
-            tot_transmit_box.grid(row=row, column=col)
+            tot_transmit_box.grid(row=row, column=col, sticky="ew")
             col += 1
-            read_exception_box = ttk.Entry(frame, w=col_width)  # errors
+            read_exception_box = ttk.Entry(frame, w=col_width,font=self.textFont, justify=tk.RIGHT)  # errors
             read_exception_box.insert(0, 0)
-            read_exception_box.grid(row=row, column=col)
+            read_exception_box.grid(row=row, column=col, sticky="ew")
             col += 1
-            write_exception_box = ttk.Entry(frame, w=col_width)
+            write_exception_box = ttk.Entry(frame, w=col_width,font=self.textFont, justify=tk.RIGHT)
             write_exception_box.insert(0, 0)
-            write_exception_box.grid(row=row, column=col)
+            write_exception_box.grid(row=row, column=col, sticky="ew")
             col += 1
-            data_mismatch_box = ttk.Entry(frame, w=col_width)
+            data_mismatch_box = ttk.Entry(frame, w=col_width,font=self.textFont, justify=tk.RIGHT)
             data_mismatch_box.insert(0, 0)
-            data_mismatch_box.grid(row=row, column=col)
+            data_mismatch_box.grid(row=row, column=col, sticky="ew")
             col += 1
-            uncorrected_box = ttk.Entry(frame, w=col_width)
+            uncorrected_box = ttk.Entry(frame, w=col_width, font=self.textFont, justify=tk.RIGHT)
             uncorrected_box.insert(0, 0)
-            uncorrected_box.grid(row=row, column=col)
+            uncorrected_box.grid(row=row, column=col, sticky="ew")
             col += 1
             row += 1
             # capture the widgets. I'll update them when the test runs
@@ -135,23 +135,27 @@ class RaspArduinoTestTab(ttk.Frame):
                  write_exception_box, data_mismatch_box, uncorrected_box)
 
     @staticmethod
-    def add_frame(parent, x_padx=2, x_pady=2, i_pad=3,
-                  fill=tk.BOTH, expand=1, side=tk.TOP):
+    def add_label_frame(parent, text, x_padx=2, x_pady=2, i_pad=3,
+                  fill=tk.BOTH, expand=1, side=tk.TOP, anchor='w'):
         """Add a frame to the given window.
 
         The x_padx and x_pady values place spacers around the outside
         of the border.
         """
-
         # Frame padding is internal to the border
-        frame = ttk.Frame(parent, padding=i_pad,
-                          borderwidth=2,
-                          relief=tk.RIDGE)
+        frame_label = ttk.Label(parent,
+                                 text=text,
+                                 style="Bigger.TLabel")
+        frame = ttk.LabelFrame(parent,
+                               labelwidget=frame_label,
+                               padding=i_pad,
+                               borderwidth=2,
+                               relief=tk.RIDGE)
         if expand == 1:
             # Stretch on resize
             frame.pack(fill=fill, expand=1, padx=x_padx, pady=x_pady, side=side)
         else:
-            frame.pack(fill=fill, padx=x_padx, pady=x_pady, side=side)
+            frame.pack(fill=fill, padx=x_padx, pady=x_pady, side=side, anchor=anchor)
 
         return frame
 
@@ -159,45 +163,46 @@ class RaspArduinoTestTab(ttk.Frame):
         test_control_frame = ttk.Frame(frame)
         test_control_frame.pack(side=tk.LEFT)
 
-        exit_butt_frame = ttk.Frame(frame)
-        exit_butt_frame.pack(side=tk.RIGHT)
+        cancel_butt_frame = ttk.Frame(frame)
+        cancel_butt_frame.pack(side=tk.RIGHT)
 
         row = 0
         col = 0
 
-        self.runButt = ttk.Button(test_control_frame, text="Run Test", w=9,
+        self.runButt = ttk.Button(test_control_frame, text="Run Test", w=9, style="BiggerText.TButton",
                                   command=self.run)
         self.runButt.grid(row=row, column=col, sticky='W')
         col += 1
-        test_label = ttk.Label(test_control_frame, text="  Test: ")
+        test_label = ttk.Label(test_control_frame, text="  Test: ", font=self.textFont)
         test_label.grid(row=row, column=col, sticky='W')
         col += 1
-        self.testSelect = ttk.Combobox(test_control_frame,
+        self.testSelect = ttk.Combobox(test_control_frame, font=self.textFont,
                                        style="Padded.TCombobox",
                                        values=["Read", "Write/Verify"],
                                        w=12)
         self.testSelect.grid(row=row, column=col, sticky='W')
         self.testSelect.current(0)
         col += 1
-        label = ttk.Label(test_control_frame, text=" IterCount: ")
+        label = ttk.Label(test_control_frame, text=" IterCount: ", font=self.textFont)
         label.grid(row=row, column=col, sticky='W')
         col += 1
-        self.iter_count = ttk.Entry(test_control_frame, w=4,
+        self.iter_count = ttk.Entry(test_control_frame, w=4, font=self.textFont,
                                     style="Padded.TEntry")
         self.iter_count.grid(row=row, column=col, sticky='W')
         self.iter_count.insert(0, 10)
         col += 1
-        self.exitButt = ttk.Button(exit_butt_frame, text="Exit", w=4,
+        self.cancelButt = ttk.Button(cancel_butt_frame, text="Cancel Test", w=10, style="BiggerText.TButton",
                                    command=quit).grid()
 
     def read_test(self, iterations):
         for i in range(iterations):
-            for adr in self.arduino_list:
-                result = self.i2c_bus.block_read_test(int(adr, base=16), 99)
+            for device in self.inventory:
+                adr = device['i2cAddress']
+                result = self.i2c_comm.block_read_test(adr, 99)
 
                 # Update the totals in the GUI with the new results
-                (tot_transmit_box, read_exception_box, write_exception_box, \
-                 data_mismatch_box, uncorrected_box) = self.status_widgets[adr]
+                (tot_transmit_box, read_exception_box, write_exception_box,\
+                           data_mismatch_box, uncorrected_box) = self.status_widgets[adr]
 
                 tt = int(tot_transmit_box.get()) + result[0]
                 tot_transmit_box.delete(0, tk.END)
@@ -211,14 +216,14 @@ class RaspArduinoTestTab(ttk.Frame):
                 data_mismatch_box.delete(0, tk.END)
                 data_mismatch_box.insert(0, dm)
 
-                self.win.update_idletasks()
+                self.root.update_idletasks()
                 self.iter_count.delete(0, tk.END)
                 self.iter_count.insert(0, iterations - i - 1)
 
     def write_verify_test(self, iterations):
         for i in range(iterations):
             for adr in self.arduino_list:
-                result = self.i2c_bus.block_write_test(int(adr, base=16), 100)
+                result = self.i2c_comm.block_write_test(int(adr, base=16), 100)
 
                 # Update the totals in the GUI with the new results
                 (tot_transmit_box, read_exception_box, write_exception_box, \

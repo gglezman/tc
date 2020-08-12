@@ -8,6 +8,7 @@
 # This file contains constants that are used by the train control python scripts.
 #
 
+from tkinter.font import Font
 
 # the following section contains constants for the GUI
 
