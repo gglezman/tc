@@ -19,6 +19,7 @@ DISABLED_COLOR = 'gray75'
 GRAY_BACKGROUND = 'gray75'
 GRAY_BORDER = 'gray72'
 
+
 # TODO - clean this out of unused styles
 def set_styles():
 
@@ -56,41 +57,19 @@ def set_styles():
     # Label Styles
     ##############################
     s.configure("RidgeReliefML.TLabel",
-                 relief=tk.RIDGE,
-                 borderwidth=2,
-                 padding=(3,3,3,3),
-                 anchor=tk.CENTER,
-                 wraplength=130,
-                 justify=tk.CENTER,
-                 font=("Helvetica", 12, "normal")
+                relief=tk.RIDGE,
+                borderwidth=2,
+                padding=(3, 3, 3, 3),
+                anchor=tk.CENTER,
+                wraplength=130,
+                justify=tk.CENTER,
+                font=("Helvetica", 12, "normal")
                 )
 
-    #s.configure('Centered.TLabel', justify='center', anchor='center')
-    #s.configure('Medium.TLabel', padding=(2, 2))
-    # not sure if anchor in the following works
-    #s.configure('MediumLeft.TLabel',
-    #            # justify='right',  # I get left justified labels
-    #            # anchor=tk.W,      #     without these 2 options
-    #            padding=(2, 2))
-    #s.configure('ThinLeft.TLabel', padding=(1, 1))
-    #s.configure('Padded.TLabel', padding=(12, 0, 8))
-    #s.configure('NoPad.TLabel', padding=(0, 0, 0))
-    #s.configure('LimitedPad.TLabel', padding=(6, 0, 3))
-    #s.configure('Borderless.TLabel', borderwidth=0, padding=(6, 2, 1))
     s.configure('Active.TLabel', background=ACTIVE_COLOR)
     s.configure('Disabled.TLabel', background=DISABLED_COLOR)
     s.configure('MediumGray.TLabel', background=GRAY_BACKGROUND)
     s.configure("Bigger.TLabel", font=("TkDefaultFont", 14, "normal"))
-
-    ##############################
-    # Labelframe Styles
-    ##############################
-    #s.configure('Ridge.TLabelframe',
-    #            # borderwidth=dfc.SMALL_BORDER_WIDTH,
-    #            relief=tk.RIDGE)
-    #s.configure('Padded5Ridge.TLabelframe',
-    #             borderwidth=dfc.SMALL_BORDER_WIDTH,
-    #           relief=tk.RIDGE, padding=5)
 
     ##############################
     # Frame Styles
@@ -104,14 +83,6 @@ def set_styles():
     # Button Styles
     ##############################
     s.configure('BiggerText.TButton', font=("Helvetica", 12, "normal"))
-
-    #s.configure('TButton', padding=(1, 3))
-    #s.configure('Medium.TButton', padding=(2, 2))
-    #s.configure('MediumThin.TButton', padding=(1, 1))
-    #s.configure('Thin.TButton', padding=(0, 0))
-    #s.configure('Special.Thin.TButton')
-    #s.configure('Borderless.TButton', borderwidth=0,
-    #            background='White', anchor='w', padding=(18, 2, 1))
     s.configure('Yellow.TButton', background='yellow')
     s.configure('Red.TButton', background='red')
     s.configure('LimeGreen.TButton', background='lime Green')
@@ -126,21 +97,12 @@ def set_styles():
     ##############################
     # Entry Styles
     ##############################
-    #s.configure('Special.TEntry')
-    # in raspTest
     s.configure('Padded.TEntry', padding=(4, 4))
 
     ##############################
     # Combobox Style
     ##############################@
     # width in the following does not work
-    # rasptest
     s.configure('Padded.TCombobox', padding=(4, 4))
-    #s.configure('Common.TCombobox', width=9)
-    #s.configure('Special.TCombobox')
 
-    ##############################
-    # Radiobutton Styles
-    ##############################
-    #s.configure('TRadiobutton', padding=(1, 3))
 

@@ -94,7 +94,7 @@ class Throttle(ttk.Frame):
             self.power_control.config_scale('active')
             self.speedometer.config_scale('active')
 
-            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, [1]) ##  this will never work: A/B
+            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, [1])  # Todo this will never work: A/B
         else:
             self.power_control.config_scale('disabled')
             self.speedometer.config_scale('disabled')

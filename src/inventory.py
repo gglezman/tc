@@ -11,24 +11,24 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
-import tc_constants as tcc
 from tkinter.font import Font
+
 
 class InventoryTab(ttk.Frame):
     def __init__(self, master, notebook, **kwargs):
-        """The inventory tab show information on all the sub-ordinante controllers in the system.
+        """The inventory tab show information on all the subordinate controllers in the system.
 
         :param master: top level object (i.e. TcGui)
         :param notebook: Notebook holding the Inventory frame (i.e. TcGui)
         :param kwargs:
         """
-        ttk.Frame.__init__(self, notebook, style='DarkGray.TFrame', padding=(10,40,10,10), **kwargs)
+        ttk.Frame.__init__(self, notebook, style='DarkGray.TFrame', padding=(10, 40, 10, 10), **kwargs)
         self.master = master
 
         self.textFont = Font(family="Helvetica", size=12)
 
-        row  = 0
-        ttk.Label(self, text="Board\nDescription", style="RidgeReliefML.TLabel",width=16)\
+        row = 0
+        ttk.Label(self, text="Board\nDescription", style="RidgeReliefML.TLabel", width=16)\
             .grid(row=row, column=0, sticky="nsew")
         ttk.Label(self, text="I2C\nAddress", style="RidgeReliefML.TLabel", width=10)\
             .grid(row=row, column=1, sticky="nsew")
@@ -48,11 +48,11 @@ class InventoryTab(ttk.Frame):
             e1.grid(row=row, column=0, sticky="ew")
             e1.insert(0, entry["boardDescription"])
 
-            e2 = ttk.Entry(self, width=10, justify=tk.CENTER,font=self.textFont)
+            e2 = ttk.Entry(self, width=10, justify=tk.CENTER, font=self.textFont)
             e2.grid(row=row, column=1, sticky="ew")
             e2.insert(0, "0x{:02x}".format(entry["i2cAddress"]))
 
-            e3 = ttk.Entry(self, width=8, justify=tk.CENTER,font=self.textFont)
+            e3 = ttk.Entry(self, width=8, justify=tk.CENTER, font=self.textFont)
             e3.grid(row=row, column=2, sticky="ew")
             e3.insert(0, entry["boardType"])
 
@@ -76,5 +76,5 @@ class InventoryTab(ttk.Frame):
             e8.grid(row=row, column=7, sticky="ew")
             e8.insert(0, entry["applicationSwVersion"])
 
-            row +=1
+            row += 1
 

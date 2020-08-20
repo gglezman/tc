@@ -8,8 +8,6 @@
 # This file contains constants that are used by the train control python scripts.
 #
 
-from tkinter.font import Font
-
 # the following section contains constants for the GUI
 
 SMALL_SCREEN = 0
@@ -82,7 +80,7 @@ I2C_CHECKSUM_LEN = 1
 # ################################################
 #  I2C Register map for this application
 #
-#  Define all register assignemnts specific to
+#  Define all register assignments specific to
 #  the application here.
 # #################################################
 I2C_REG_DT_A_POWER_STATUS = 30
@@ -99,12 +97,12 @@ I2C_DT_MOMENTUM_LEN = 1
 
 I2C_REG_DT_A_POWER_LEVEL = 33
 I2C_REG_DT_B_POWER_LEVEL = 43
-I2C_DT_POWER_LEVE_LEN = 1
+I2C_DT_POWER_LEVEL_LEN = 1
 
-I2C_REG_DT_A_SPEED = 34;
-I2C_REG_DT_B_SPEED = 44;
-I2C_DT_SPEED_LEN = 1;
+I2C_REG_DT_A_SPEED = 34
+I2C_REG_DT_B_SPEED = 44
+I2C_DT_SPEED_LEN = 1
 
-I2C_REG_DT_A_EMERGENCY_STOP = 35;
-I2C_REG_DT_B_EMERGENCY_STOP = 45;
-I2C_DT_EMERGENCY_STOP_LEN = 1;
+I2C_REG_DT_A_EMERGENCY_STOP = 35
+I2C_REG_DT_B_EMERGENCY_STOP = 45
+I2C_DT_EMERGENCY_STOP_LEN = 1

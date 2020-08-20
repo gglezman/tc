@@ -62,8 +62,6 @@ class TcGui:
 
     def run(self):
         """Run the GUI
-
-        :param i2c_comm: class to communicate over the IC bus to controllers
         :return: None
         """
         self.board_inventory = self.collect_inventory()
@@ -106,8 +104,6 @@ class TcGui:
             board_inventory.append(self.i2c_comm.get_device_info(adr))
 
         return board_inventory
-        #self.root.after(100000, self.update_inventory)
 
     def tc_exit(self):
-        #self.root.destroy()  #  TcGui: object has no attribute 'children'
         exit()
