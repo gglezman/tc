@@ -12,8 +12,10 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
-import tc_styles
+# import tc_styles
 
+throttle_a_instance = 0
+throttle_b_instance = 1
 
 class ThrottleTab(ttk.Frame):
     def __init__(self, master, i2c_comm, **kwargs):
@@ -26,10 +28,10 @@ class ThrottleTab(ttk.Frame):
         self.i2c_comm = i2c_comm
 
         ttk.Frame.__init__(self, master, style='DarkGray.TFrame', **kwargs)
-        self.throttle_A = Throttle(self, 'Locomotive A')
+        self.throttle_A = Throttle(self, 'Locomotive A', throttle_a_instance)
         self.throttle_A.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
-        self.throttle_B = Throttle(self, 'Locomotive B')
+        self.throttle_B = Throttle(self, 'Locomotive B', throttle_a_instance)
         self.throttle_B.grid(row=0, column=1, sticky='nsew', padx=5, pady=5)
 
         # the following ensure equal split of the frame
@@ -39,7 +41,7 @@ class ThrottleTab(ttk.Frame):
 
 
 class Throttle(ttk.Frame):
-    def __init__(self, throttle_tab, title, **kwargs):
+    def __init__(self, throttle_tab, title, throttle_instance, **kwargs):
         """
 
         :param throttle_tab:
@@ -47,6 +49,7 @@ class Throttle(ttk.Frame):
         """
 
         self.parent = throttle_tab
+        self.throttle_instance = throttle_instance
 
         ttk.Frame.__init__(self, throttle_tab,
                            style='MediumGray.TFrame',
@@ -90,16 +93,18 @@ class Throttle(ttk.Frame):
         :param state: on/off
         :return:
         """
+        power_status_reg = tcc.I2C_REG_DT_POWER_STATUS + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+
         if state == 'on':
             self.power_control.config_scale('active')
             self.speedometer.config_scale('active')
 
-            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, [1])  # Todo this will never work: A/B
+            self.parent.i2c_comm.write_register_verify(8, power_status_reg,  [1])
         else:
             self.power_control.config_scale('disabled')
             self.speedometer.config_scale('disabled')
 
-            self.parent.i2c_comm.set_register(8, tcc.I2C_REG_DT_A_POWER_STATUS, 1, 0)
+            self.parent.i2c_comm.write_register_verify(8, power_status_reg, [0])
 
 
 class ButtonPanel(ttk.Frame):

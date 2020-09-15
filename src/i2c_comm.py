@@ -25,7 +25,7 @@ class I2C_Comm:
                       "boardVersion": 0, "i2cCommSwVersion": "unknown", "inventorySwVersion": "unknown",
                       "applicationSwVersion": "unknown"}
 
-        reg, dev_info = self.get_register(adr,
+        reg, dev_info = self.read_register(adr,
                                           tcc.I2C_REG_INVENTORY_VERSION,
                                           tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_VERSION_LEN)
         if reg == tcc.I2C_REG_INVENTORY_VERSION and dev_info[0] == 1:
@@ -34,45 +34,40 @@ class I2C_Comm:
             # ####################################
             board_info["inventoryVersion"] = dev_info[0]
             #
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_ADR, tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_ADR_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_I2C_ADR, tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_ADR_LEN)
             if reg > 0:
                 board_info["i2cAddress"] = dev_info[0]
             #
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_TYPE, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_TYPE_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_BOARD_TYPE, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_TYPE_LEN)
             if reg > 0:
                 board_info["boardType"] = dev_info[0]
             #
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_DESCRIPTION_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_BOARD_DESCRIPTION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_DESCRIPTION_LEN)
             if reg > 0:
                 board_info["boardDescription"] = self.char_list_to_string(dev_info)
 
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_BOARD_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_VERSION_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_BOARD_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_BOARD_VERSION_LEN)
             if reg > 0:
                 board_info["boardVersion"] = dev_info[0]
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_I2C_COMM_SW_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_COMM_SW_VERSION_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_I2C_COMM_SW_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_I2C_COMM_SW_VERSION_LEN)
             if reg > 0:
                 board_info["i2cCommSwVersion"] = self.char_list_to_string(dev_info)
 
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_INVENTORY_SW_VERSION,  tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_SW_VERSION_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_INVENTORY_SW_VERSION,  tcc.I2C_REG_ID_LEN + tcc.I2C_INVENTORY_SW_VERSION_LEN)
             if reg > 0:
                 board_info["inventorySwVersion"] = self.char_list_to_string(dev_info)
 
-            reg, dev_info = self.get_register(adr, tcc.I2C_REG_APP_SW_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_APP_SW_VERSION_LEN)
+            reg, dev_info = self.read_register(adr, tcc.I2C_REG_APP_SW_VERSION, tcc.I2C_REG_ID_LEN + tcc.I2C_APP_SW_VERSION_LEN)
             if reg > 0:
                 board_info["applicationSwVersion"] = self.char_list_to_string(dev_info)
 
-            reg, dev_info = self.get_register(adr, 99, 2)
-            if len(dev_info) > 0:
-                print("99 data : {}".format(dev_info))
-            else:
-                print("99 data: None****")
         return board_info
 
     @staticmethod
     def char_list_to_string(char_list):
-        return ''.join([chr(c) for c in char_list if c > 31 and c < 128])
+        return ''.join([chr(c) for c in char_list if 31 < c and c < 128])
 
-    def get_register(self, adr, reg, data_length):
+    def read_register(self, adr, reg, data_length):
         """
         :param adr: I2C Bus address
         :param reg: board register
@@ -93,22 +88,24 @@ class I2C_Comm:
                         if cmd == reg:
                             break
                     else:
-                        print("get_register checksum error {}".format(self.validate_checksum(reg_data)))
+                        print("read_register checksum error {}".format(self.validate_checksum(reg_data)))
                 else:
-                    print("get_register blipped: len:{}".format(length))
+                    print("read_register length error {}".format(length))
             except IOError:
-                print("Error get _register at adr {} / reg {}".format(adr, reg))
+                print("IOError read_register at adr {} / reg {}".format(adr, reg))
 
         return cmd, reg_data
 
+    """
     def set_register(self, adr, reg, send_data):
         try:
             self.smbus.write_i2c_block_data(adr, reg, send_data)
         except IOError:
             print("Error setRegister at adr {} / reg {}".format(adr, reg))
 
+    
     def get_byte_reg(self, adr, reg):
-        """Read one byte of data from the specified register at the specified address.
+        Read one byte of data from the specified register at the specified address.
 
         This would be a useful function for collecting inventory data except the Arduino
         code would need to be rewritten. The Arduino code sends multiple bytes back, starting
@@ -122,7 +119,7 @@ class I2C_Comm:
         :param reg:
         :return: reg or -1 on error
                  reg_data
-        """
+        
         for retry in range(0, 4):
             try:
                 reg_data = self.smbus.read_byte_data(adr, reg)
@@ -135,7 +132,7 @@ class I2C_Comm:
                 reg_data = 0
 
         return return_reg, reg_data
-
+     """
     @staticmethod
     def get_controller_list():
         """ Find all active I2C devices on the bus
@@ -144,8 +141,6 @@ class I2C_Comm:
         """
         arduino_list = []
 
-        cmd = "i2cdetect -y 1"
-        # run_cmd = ["i2cdetect", "-y", "1"]   use when shell=False
         run_cmd = "i2cdetect -y 1"
 
         try:
@@ -166,52 +161,64 @@ class I2C_Comm:
 
         return arduino_list
 
-    def block_read_test(self, adr, reg):
-        """Execute a block read test on the given address / register
+    def block_read_test(self, adr):
+        """Execute a block read test on the given address.
 
         A loopback test consists of the following message sent 256 times
         to the given adr:
              block data read to
-             - register 'reg'
+             - register : I2C_REG_UP_COUNTER
+        The data read is expected to increment on each read.
 
         The  return value is a tuple (messagesSent, readExceptions, data_mismatches).
+           data_mismatches = length_failures + Checksum fail + regId fail + data (up_counter) fail
         """
         messages_to_send = 256
         read_exception = 0
         data_mismatch = 0
         length = 3    # reg, count, cs
+        reg = tcc.I2C_REG_UP_COUNTER
+
+        # Reset the upCounter
+        uncorrected_error, re, we, dm = self.write_register_verify(adr, reg, [0])
+        if uncorrected_error > 0:
+            print("An attempt to reset the UP_COUNTER at adr {} resulted in an uncorrectable error: {}".format(
+                adr,
+                uncorrected_error)
+            )
+
+        # now do the reads
+        expected_data = 0
         for i in range(messages_to_send):
             try:
                 read_data = self.smbus.read_i2c_block_data(adr, reg, length)
                 if len(read_data) == length:
                     if self.validate_checksum(read_data) == 0:
                         read_data.pop(-1)   # remove the checksum
-                        if read_data[0] != reg:
+                        if read_data[0] != reg or read_data[1] != expected_data:
                             data_mismatch += 1
-                            print("RegId read error")
+                            print("Read error. S/B {} Is {}".format(expected_data, read_data[1]))
                     else:
-                        data_mismatch += 1
+                        data_mismatch += 1    # todo - verify the following byte assignments
                         print("Checksum error: {} {} ".format(read_data[1], read_data[2]))
                 else:
                     data_mismatch += 1
                     print("Length read error")
+                expected_data += 1
             except IOError:
                 read_exception += 1
                 print("Read IOerror at adr {}".format(adr))
-            sleep(0.00001)
+            #sleep(0.00001)
 
         return messages_to_send, read_exception, data_mismatch
 
-    def block_write_test(self, adr, reg):
+    def block_write_test(self, adr):
         """Execute a loopback test on the given address
 
-        A loopback test consists of the following message sent 256 times
-        to the given adr:
-             block data write to
-             - register 100
-             - data [d1, d2, d3, cs]
-             block data read from
-             - register 100, 1+3+1 bytes (regId and data and cs)
+        A loopback test consists of the following message sent 256 times to the given adr:
+             write_register_verify to write_test reg
+             - data [d1, d2, d3]
+             - read back the seqNum to verify
 
         The  return value is a tuple (
                  messages_sent,
@@ -226,12 +233,13 @@ class I2C_Comm:
         read_exception = 0
         data_mismatch = 0
         uncorrectable_err = 0
+        reg = tcc.I2C_REG_WRITE_TEST
 
         for i in range(messages_to_send):
             # generate the data
             data = [i % 256, (i + 1) % 256, (i + 2) % 256]
             # do the write
-            ue, re, we, dm = self.write_verify(adr, reg, data)
+            ue, re, we, dm = self.write_register_verify(adr, reg, data)
 
             # update the results
             uncorrectable_err += ue
@@ -242,12 +250,19 @@ class I2C_Comm:
         return messages_to_send, read_exception, write_exception, \
                data_mismatch, uncorrectable_err
 
-    def write_verify(self, adr, reg, data):
-        """Do a single write / verify test with retries on the write and read back"""
+    def write_register_verify(self, adr, reg, data):
+        """Do a single write / verify test with retries on the write and read back
+
+        return -
+           uncorrected_errors
+           read_exception
+           write_exception
+           data_mismatch
+        """
         write_exception = 0
         read_exception = 0
         data_mismatch = 0
-        final_result = 0
+        uncorrected_errors = 0
         read_result = -1
 
         for attempt in range(1, 5):
@@ -264,18 +279,18 @@ class I2C_Comm:
                 data_mismatch += dm
                 if read_result == 0:
                     break
-        # if attempt >= 5:                     # todo - i changed the check from 4 to 5
-        if read_result != 0:                     # todo - i changed the check from 4 to 5
-            final_result = 1
-        errors = write_exception + read_exception + data_mismatch + final_result
+        if read_result != 0:
+            uncorrected_errors = 1
         """
+        errors = write_exception + read_exception + data_mismatch + uncorrected_errors
+        
         if errors > 0:
         print("we {}, re {}, dm {}, unerr {}".format(write_exception,
         read_exception,
         data_mismatch,
-        final_result))
+        uncorrected_error))
         """
-        return final_result, read_exception, write_exception, data_mismatch
+        return uncorrected_errors, read_exception, write_exception, data_mismatch
 
     def write_func(self, adr, reg, data):
         """Write given data to the given address / register
@@ -286,7 +301,7 @@ class I2C_Comm:
         Generate a checksum and append it to the data. Make n attempts to
         write the data to adr/register. If an IOError occurs during the
         write, count it and retry. If a retry is required, use a new
-        write_seq number.
+        write_seq_num.
 
         return
             result  0 : success, data was written, (may have taken retries)

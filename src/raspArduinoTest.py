@@ -185,7 +185,7 @@ class RaspArduinoTestTab(ttk.Frame):
         self.testSelect.grid(row=row, column=col, sticky='W')
         self.testSelect.current(0)
         col += 1
-        label = ttk.Label(test_control_frame, text=" IterCount: ", font=self.textFont)
+        label = ttk.Label(test_control_frame, text=" Iteration Count: ", font=self.textFont)
         label.grid(row=row, column=col, sticky='W')
         col += 1
         self.iter_count = ttk.Entry(test_control_frame, w=4, font=self.textFont,
@@ -200,7 +200,7 @@ class RaspArduinoTestTab(ttk.Frame):
         for i in range(iterations):
             for device in self.inventory:
                 adr = device['i2cAddress']
-                result = self.i2c_comm.block_read_test(adr, 99)
+                result = self.i2c_comm.block_read_test(adr)
 
                 # Update the totals in the GUI with the new results
                 (tot_transmit_box, read_exception_box, write_exception_box,
@@ -223,10 +223,13 @@ class RaspArduinoTestTab(ttk.Frame):
                 self.iter_count.insert(0, iterations - i - 1)
 
     def write_verify_test(self, iterations):
+        """
+        iterations - the number of times the user wants the test run
+        """
         for i in range(iterations):
             for device in self.inventory:
                 adr = device['i2cAddress']
-                result = self.i2c_comm.block_write_test(adr, 100)
+                result = self.i2c_comm.block_write_test(adr)
 
                 # Update the totals in the GUI with the new results
                 (tot_transmit_box, read_exception_box, write_exception_box,

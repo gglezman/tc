@@ -42,7 +42,12 @@ else:
     scale_slider_padding = (8, 3, 10)
     # print('small screen detected')
 
-# See I2C register definitions
+# See I2C register definitions. The following are the I2C register assignments (and register length)
+# for each of the supported I2C registers. For example, the WRITE_SEQ_NUM register is assigned address 19
+# and it is 1 byte in length.
+
+# Note this information must match that used by the Arduinos
+
 # Inventory data
 I2C_REG_ID_LEN = 1
 
@@ -67,6 +72,15 @@ I2C_I2C_COMM_SW_VERSION_LEN = 9
 I2C_REG_INVENTORY_SW_VERSION = 11
 I2C_INVENTORY_SW_VERSION_LEN = 9
 
+I2C_REG_WRITE_TEST = 15
+I2C_WRITE_TEST_LEN = 3
+
+I2C_REG_UP_COUNTER = 16
+I2C_UP_COUNTER_LEN = 1
+
+# Checksum failure register. This is a counter which is incremented each time
+# a checksum is detected in the received data AT the Arduino. The top level controller
+# can read this register to determine how many checksum failures have occurred
 I2C_REG_I2C_WRITE_CHKSUM_FAILURE = 18
 I2C_I2C_WRITE_CHKSUM_FAILURE_LEN = 2
 
@@ -76,6 +90,7 @@ I2C_WRITE_SEQ_NUM_LEN = 1
 I2C_REG_APP_SW_VERSION = 20
 I2C_APP_SW_VERSION_LEN = 9
 
+# All transmissions include a 1 byte checksum
 I2C_CHECKSUM_LEN = 1
 # ################################################
 #  I2C Register map for this application
@@ -83,26 +98,24 @@ I2C_CHECKSUM_LEN = 1
 #  Define all register assignments specific to
 #  the application here.
 # #################################################
-I2C_REG_DT_A_POWER_STATUS = 30
-I2C_REG_DT_B_POWER_STATUS = 40
+
+DT_THROTTLE_BASE = 30
+DT_THROTTLE_ALLOCATION = 20
+
+I2C_REG_DT_POWER_STATUS = DT_THROTTLE_BASE + 0         # A: 30, B:50
 I2C_DT_POWER_STATUS_LEN = 1
 
-I2C_REG_DT_A_ADIRECTION = 31
-I2C_REG_DT_B_ADIRECTION = 41
+I2C_REG_DT_DIRECTION = DT_THROTTLE_BASE + 1          # A: 31, B:51
 I2C_DT_DIRECTION_LEN = 1
 
-I2C_REG_DT_A_MOMENTUM = 32
-I2C_REG_DT_B_MOMENTUM = 42
+I2C_REG_DT_MOMENTUM = DT_THROTTLE_BASE + 2            # A: 32, B:52
 I2C_DT_MOMENTUM_LEN = 1
 
-I2C_REG_DT_A_POWER_LEVEL = 33
-I2C_REG_DT_B_POWER_LEVEL = 43
+I2C_REG_DT_POWER_LEVEL = DT_THROTTLE_BASE + 3         # A: 33, B:53
 I2C_DT_POWER_LEVEL_LEN = 1
 
-I2C_REG_DT_A_SPEED = 34
-I2C_REG_DT_B_SPEED = 44
+I2C_REG_DT_SPEED = DT_THROTTLE_BASE + 4               # A: 34, B:54
 I2C_DT_SPEED_LEN = 1
 
-I2C_REG_DT_A_EMERGENCY_STOP = 35
-I2C_REG_DT_B_EMERGENCY_STOP = 45
+I2C_REG_DT_EMERGENCY_STOP = DT_THROTTLE_BASE + 5      # A: 35, B:55
 I2C_DT_EMERGENCY_STOP_LEN = 1

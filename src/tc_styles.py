@@ -12,7 +12,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
-from tkinter.font import Font
+# from tkinter.font import Font
 
 ACTIVE_COLOR = 'DeepSkyBlue2'
 DISABLED_COLOR = 'gray75'
