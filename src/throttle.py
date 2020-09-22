@@ -13,6 +13,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
 # import tc_styles
+from time import sleep
 
 throttle_a_instance = 0
 throttle_b_instance = 1
@@ -31,13 +32,19 @@ class ThrottleTab(ttk.Frame):
         self.throttle_A = Throttle(self, 'Locomotive A', throttle_a_instance)
         self.throttle_A.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
-        self.throttle_B = Throttle(self, 'Locomotive B', throttle_a_instance)
+        self.throttle_B = Throttle(self, 'Locomotive B', throttle_b_instance)
         self.throttle_B.grid(row=0, column=1, sticky='nsew', padx=5, pady=5)
 
         # the following ensure equal split of the frame
         self.grid_columnconfigure(0, weight=1, uniform="group1")
         self.grid_columnconfigure(1, weight=1, uniform="group1")
         self.grid_rowconfigure(0, weight=1)
+
+    def update_inventory(self, inventory):
+        for entry in inventory:
+            if entry['boardType'] == 2:
+                self.throttle_A.set_i2c_address(entry['i2cAddress'])
+                self.throttle_B.set_i2c_address(entry['i2cAddress'])
 
 
 class Throttle(ttk.Frame):
@@ -49,12 +56,12 @@ class Throttle(ttk.Frame):
         """
 
         self.parent = throttle_tab
+        self.throttle_address = 0
         self.throttle_instance = throttle_instance
 
         ttk.Frame.__init__(self, throttle_tab,
                            style='MediumGray.TFrame',
                            **kwargs)
-
         # Title Label
         self.label = ttk.Label(self, text=title, anchor='center',
                                font=("TkDefaultFont", tcc.large_text, "bold"),
@@ -79,19 +86,29 @@ class Throttle(ttk.Frame):
         self.grid_columnconfigure(1, weight=1, uniform="group2")
         self.grid_columnconfigure(2, weight=1, uniform="group2")
 
+    def set_i2c_address(self, adr):
+        self.throttle_address = adr
+
+        # Configure the board
+        self.power_state('off')
+        self.power_level(0)
+        self.set_direction('forward')
+        self.set_momentum('off')
+
     def power_setting(self, value):
         """Power setting gets reported by power control
 
         :param value: current value
         :return: None
         """
-        self.speedometer.set_reading(value)  # fixme - remove and send
+        self.speedometer.set_reading(value)  # fixme - remove and send to Arduino
+                                             # speedometer is set by reading
 
     def power_state(self, state):
-        """Power state of Throttle has changed
+        """Power state of Throttle has changed. The user pressed the button
 
-        :param state: on/off
-        :return:
+        :param state: 'on'/'off'
+        :return: None
         """
         power_status_reg = tcc.I2C_REG_DT_POWER_STATUS + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
 
@@ -99,13 +116,43 @@ class Throttle(ttk.Frame):
             self.power_control.config_scale('active')
             self.speedometer.config_scale('active')
 
-            self.parent.i2c_comm.write_register_verify(8, power_status_reg,  [1])
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, power_status_reg, [tcc.POWER_ENABLED])
         else:
             self.power_control.config_scale('disabled')
             self.speedometer.config_scale('disabled')
 
-            self.parent.i2c_comm.write_register_verify(8, power_status_reg, [0])
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, power_status_reg, [tcc.POWER_DISABLED])
 
+    def power_level(self, new_power_level):
+        power_level_reg = tcc.I2C_REG_DT_POWER_LEVEL + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+
+        self.parent.i2c_comm.write_register_verify(self.throttle_address, power_level_reg, [new_power_level])
+
+    def set_direction(self, new_direction):
+        """User has pressed the direction button. Send it to the throttle board.
+
+        :param new_direction: 'forward'/'reverse'
+        :return: None
+        """
+        direction_reg = tcc.I2C_REG_DT_DIRECTION + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+
+        if new_direction == 'forward':
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, direction_reg, [tcc.DIR_FORWARD])
+        else:
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, direction_reg, [tcc.DIR_REVERSE])
+
+    def set_momentum(self, new_momentum):
+        """User has pressed the momentum button. Send it to the throttle board
+
+        :param new_momentun: 'on'/off'
+        :return: None
+        """
+        momentum_reg = tcc.I2C_REG_DT_MOMENTUM + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+
+        if new_momentum == 'on':
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, momentum_reg, [tcc.MOMENTUM_ENABLED])
+        else:
+            self.parent.i2c_comm.write_register_verify(self.throttle_address, momentum_reg, [tcc.MOMENTUM_DISABLED])
 
 class ButtonPanel(ttk.Frame):
     def __init__(self, throttle_frame, **kwargs):
@@ -119,8 +166,8 @@ class ButtonPanel(ttk.Frame):
                            **kwargs)
         self.throttle_frame = throttle_frame
         self.power_on = False
-        self.momentum = False
-        self.direction = 'forward'     # or reverse
+        self.momentum = 'disabled'     # disabled, on, off
+        self.direction = 'forward'     # disabled, on, off
 
         col = 0
         row = 0
@@ -148,8 +195,7 @@ class ButtonPanel(ttk.Frame):
         # Button - Momentum
         ttk.Label(self, text="Momentum", style='MediumGray.TLabel').grid(row=row, column=col)
         row += 1
-        self.momentum_but = ttk.Button(self,
-                                       command=self.momentum_but_pressed)
+        self.momentum_but = ttk.Button(self, command=self.momentum_but_pressed)
         self.config_momentum('disabled')
         self.momentum_but.grid(row=row, column=col)
         row += 1
@@ -161,8 +207,7 @@ class ButtonPanel(ttk.Frame):
         # Button - direction
         ttk.Label(self, text="Direction", style='MediumGray.TLabel').grid(row=row, column=col)
         row += 1
-        self.direction_but = ttk.Button(self,
-                                        command=self.direction_but_pressed)
+        self.direction_but = ttk.Button(self, command=self.direction_but_pressed)
         self.config_direction('disabled')
         self.direction_but.grid(row=row, column=col)
 
@@ -192,31 +237,31 @@ class ButtonPanel(ttk.Frame):
 
     def momentum_but_pressed(self):
         if self.power_on:
-            if self.momentum:
+            if self.momentum == 'on':
                 self.config_momentum('off')
             else:
                 self.config_momentum('on')
 
-    def config_momentum(self, state):
+            self.throttle_frame.set_momentum(self.momentum )
+
+    def config_momentum(self, new_momentum):
         """States are : disabled, on, off"""
-        if state == 'disabled':
-            self.momentum = False
+        self.momentum = new_momentum
+        if self.momentum == 'disabled':
             self.momentum_but.config(style='Gray.TButton')
             self.momentum_but.config(text='OFF')
             self.momentum_but.config(state='disabled')
-        elif state == 'on':
-            self.momentum = True
+        elif self.momentum == 'on':
             self.momentum_but.config(style='Red.TButton')
             self.momentum_but.config(text='ON')
             self.momentum_but.config(state='normal')
         else:
-            self.momentum = False
             self.momentum_but.config(style='LimeGreen.TButton')
             self.momentum_but.config(text='OFF')
             self.momentum_but.config(state='normal')
 
     def direction_but_pressed(self):
-        """
+        """User has pressed the direction button
 
         :return:
         """
@@ -226,20 +271,21 @@ class ButtonPanel(ttk.Frame):
             else:
                 self.config_direction('forward')
 
-    def config_direction(self, state):
+            self.throttle_frame.set_direction(self.direction )
+
+    def config_direction(self, new_direction):
         """States are : disabled, forward, reverse"""
-        if state == 'disabled':
-            self.direction = 'forward'
+        self.direction = new_direction
+
+        if self.direction== 'disabled':
             self.direction_but.config(style='Gray.TButton')
             self.direction_but.config(text='FWD')
             self.direction_but.config(state='disabled')
-        elif state == 'forward':
-            self.direction = 'forward'
+        elif self.direction == 'forward':
             self.direction_but.config(style='Wheat1.TButton')
             self.direction_but.config(text='FWD')
             self.direction_but.config(state='normal')
         else:
-            self.direction = 'reverse'
             self.direction_but.config(style='Wheat3.TButton')
             self.direction_but.config(text='REV')
             self.direction_but.config(state='normal')
@@ -302,6 +348,8 @@ class ScaledSlider(ttk.Frame):
         :param event:
         :return:
         """
+        self.throttle_frame.power_level(int(self.scale.get()))
+
         self.throttle_frame.power_setting(self.scale.get())
 
     def set_reading(self, value):

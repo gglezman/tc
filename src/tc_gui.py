@@ -47,7 +47,9 @@ class TcGui:
         self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)   # classes for their respective pages
 
         # padding -> around the frame when the tab is selected
-        self.notebook.add(ThrottleTab(self.notebook, i2c_comm, relief=tk.RIDGE), text="Throttle", padding=tcc.tab_padding)
+        self.throttleTab = ThrottleTab(self.notebook, i2c_comm, relief=tk.RIDGE)
+        self.notebook.add(self.throttleTab, text="Throttle", padding=tcc.tab_padding)
+
         self.notebook.add(self.frameS, text="Switches", padding=tcc.tab_padding)
         self.notebook.add(self.frameL, text="Lights", padding=tcc.tab_padding)
 
@@ -65,6 +67,7 @@ class TcGui:
         :return: None
         """
         self.board_inventory = self.collect_inventory()
+        self.throttleTab.update_inventory(self.board_inventory)
         self.inventoryTab.update_inventory(self.board_inventory)
         self.raspArduinoTestTab.update_inventory(self.board_inventory)
 
