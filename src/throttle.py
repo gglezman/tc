@@ -11,6 +11,7 @@
 
 import tkinter as tk
 import tkinter.ttk as ttk
+import threading
 import tc_constants as tcc
 # import tc_styles
 from time import sleep
@@ -46,6 +47,10 @@ class ThrottleTab(ttk.Frame):
                 self.throttle_A.set_i2c_address(entry['i2cAddress'])
                 self.throttle_B.set_i2c_address(entry['i2cAddress'])
 
+    def shutDown(self):
+        self.throttle_A.shutDown()
+        self.throttle_B.shutDown()
+
 
 class Throttle(ttk.Frame):
     def __init__(self, throttle_tab, title, throttle_instance, **kwargs):
@@ -54,7 +59,6 @@ class Throttle(ttk.Frame):
         :param throttle_tab:
         :param title:
         """
-
         self.parent = throttle_tab
         self.throttle_address = 0
         self.throttle_instance = throttle_instance
@@ -95,14 +99,31 @@ class Throttle(ttk.Frame):
         self.set_direction('forward')
         self.set_momentum('off')
 
-    def power_setting(self, value):
-        """Power setting gets reported by power control
+        self.start_daemon();
 
-        :param value: current value
+    def start_daemon(self):
+        x = threading.Thread(target=self.poll_speed, daemon=True)
+        x.start()
+
+    def poll_speed(self):
+        """This function regularly polls the board for current power setting.
+
+        Note that internally we use 0-200 but the scale slider uses 0-100, hence the divide by 2."""
+
+        speed_reg = tcc.I2C_REG_DT_SPEED + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+        while (1):
+            sleep(0.1)
+            reg, speed = self.parent.i2c_comm.read_register(self.throttle_address, speed_reg, tcc.I2C_REG_ID_LEN + tcc.I2C_DT_SPEED_LEN)
+            if reg > 0:
+                self.power_setting(speed[0]/2)
+
+    def power_setting(self, value):
+        """Power setting has changed. This change is reported by poll_speed() running on a different thread.
+
+        :param value: current value (0-100)
         :return: None
         """
-        self.speedometer.set_reading(value)  # fixme - remove and send to Arduino
-                                             # speedometer is set by reading
+        self.speedometer.set_reading(value)
 
     def power_state(self, state):
         """Power state of Throttle has changed. The user pressed the button
@@ -124,6 +145,10 @@ class Throttle(ttk.Frame):
             self.parent.i2c_comm.write_register_verify(self.throttle_address, power_status_reg, [tcc.POWER_DISABLED])
 
     def power_level(self, new_power_level):
+        """User has changed the power level. Send it to the board
+
+        Note that the range from the scale is 0-100 but internally, we use 0-200.
+        """
         power_level_reg = tcc.I2C_REG_DT_POWER_LEVEL + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
 
         self.parent.i2c_comm.write_register_verify(self.throttle_address, power_level_reg, [new_power_level])
@@ -153,6 +178,9 @@ class Throttle(ttk.Frame):
             self.parent.i2c_comm.write_register_verify(self.throttle_address, momentum_reg, [tcc.MOMENTUM_ENABLED])
         else:
             self.parent.i2c_comm.write_register_verify(self.throttle_address, momentum_reg, [tcc.MOMENTUM_DISABLED])
+
+    def shutDown(self):
+        self.power_state('off')
 
 class ButtonPanel(ttk.Frame):
     def __init__(self, throttle_frame, **kwargs):
@@ -343,17 +371,17 @@ class ScaledSlider(ttk.Frame):
         self.scale.grid(row=row+2, column=1, rowspan=11)
 
     def scale_updated(self, event):
-        """User has moved slider
+        """User has moved slider. Get the value and sent it up.
+
+        Note that the scale slider uses 0-100 but internally we use 0-200
 
         :param event:
         :return:
         """
-        self.throttle_frame.power_level(int(self.scale.get()))
-
-        self.throttle_frame.power_setting(self.scale.get())
+        self.throttle_frame.power_level(int(self.scale.get()*2))
 
     def set_reading(self, value):
-        """USed to set current value for tracking_only
+        """Used to set current value for tracking_only
 
         :param value:
         :return:

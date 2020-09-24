@@ -9,6 +9,7 @@
 # to present a GUI to the cash flow report.
 #
 
+from time import sleep
 import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
@@ -109,4 +110,6 @@ class TcGui:
         return board_inventory
 
     def tc_exit(self):
+        self.throttleTab.shutDown()
+        sleep(.5)
         exit()
