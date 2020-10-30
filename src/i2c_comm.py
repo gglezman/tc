@@ -259,6 +259,7 @@ class I2C_Comm:
            write_exception
            data_mismatch
         """
+        #print("Adr: {}, reg {}, data {}".format(adr, reg,data));
         write_exception = 0
         read_exception = 0
         data_mismatch = 0

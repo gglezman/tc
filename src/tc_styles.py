@@ -44,8 +44,8 @@ def set_styles():
                 borderwidth=int(tcc.SCREEN_WIDTH/130),
                 troughcolor='black',
                 troughrelief=tk.SUNKEN,
-                sliderlength=int(tcc.SCREEN_HEIGHT/20),
-                sliderthickness=int(tcc.SCREEN_WIDTH/30),   # 40
+                sliderlength=int(tcc.SCREEN_HEIGHT/16),
+                sliderthickness=int(tcc.SCREEN_WIDTH/20),   # 40
                 sliderrelief=tk.RIDGE,
                 background='gray',
                 )
@@ -68,7 +68,7 @@ def set_styles():
 
     s.configure('Active.TLabel', background=ACTIVE_COLOR)
     s.configure('Disabled.TLabel', background=DISABLED_COLOR)
-    s.configure('MediumGray.TLabel', background=GRAY_BACKGROUND)
+    s.configure('MediumGray.TLabel',font=("Helvetica", tcc.large_text, "normal"), background=GRAY_BACKGROUND)
     s.configure("Bigger.TLabel", font=("TkDefaultFont", 14, "normal"))
 
     ##############################
@@ -82,12 +82,13 @@ def set_styles():
     ##############################
     # Button Styles
     ##############################
-    s.configure('BiggerText.TButton', font=("Helvetica", 12, "normal"))
-    s.configure('Yellow.TButton', background='yellow')
-    s.configure('Red.TButton', background='red')
-    s.configure('LimeGreen.TButton', background='lime Green')
-    s.configure('Wheat1.TButton', background='wheat1')
-    s.configure('Wheat3.TButton', background='wheat3')
+    #s.configure('BiggerText.TButton', font=("Helvetica", 12, "normal"))
+    s.configure('Gray.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray75', padding=10)
+    s.configure('Yellow.TButton', font=("Helvetica", tcc.med_text, "normal"), background='yellow', padding=10)
+    s.configure('Red.TButton', font=("Helvetica", tcc.med_text, "normal"), background='red', padding=10)
+    s.configure('LimeGreen.TButton', font=("Helvetica", tcc.med_text, "normal"), background='lime Green', padding=10)
+    s.configure('Wheat1.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat1', padding=10)
+    s.configure('Wheat3.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat3', padding=10)
     s.map("Yellow.TButton", background=[('active', 'yellow')])
     s.map("Red.TButton", background=[('active', 'red')])
     s.map("LimeGreen.TButton", background=[('active', 'lime green')])

@@ -73,13 +73,14 @@ class TcGui:
         self.raspArduinoTestTab.update_inventory(self.board_inventory)
 
         # get screen width and height
-        ws = self.root.winfo_screenwidth()  # width of the screen
-        hs = self.root.winfo_screenheight()  # height of the screen
+        #ws = self.root.winfo_screenwidth()  # width of the screen
+        #hs = self.root.winfo_screenheight()  # height of the screen
 
         # calculate x and y coordinates for the Tk root window
-        x = int((ws / 2) - (tcc.SCREEN_WIDTH / 2))
-        y = int((hs / 2) - (tcc.SCREEN_HEIGHT / 2))
-
+        #x = int((ws / 2) - (tcc.SCREEN_WIDTH / 2))
+        #y = int((hs / 2) - (tcc.SCREEN_HEIGHT / 2))
+        x = 0
+        y = 0
         # set the dimensions of the screen and where it is placed
 
         self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))

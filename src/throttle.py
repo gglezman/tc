@@ -43,7 +43,7 @@ class ThrottleTab(ttk.Frame):
 
     def update_inventory(self, inventory):
         for entry in inventory:
-            if entry['boardType'] == 2:
+            if entry['boardType'] == tcc.BOARD_TYPE_THROTTLE:
                 self.throttle_A.set_i2c_address(entry['i2cAddress'])
                 self.throttle_B.set_i2c_address(entry['i2cAddress'])
 
@@ -68,13 +68,13 @@ class Throttle(ttk.Frame):
                            **kwargs)
         # Title Label
         self.label = ttk.Label(self, text=title, anchor='center',
-                               font=("TkDefaultFont", tcc.large_text, "bold"),
+                               font=("TkDefaultFont", tcc.extra_large, "bold"),
                                style='MediumGray.TLabel',
                                padding=tcc.title_padding)
         self.label.grid(sticky='nswe', row=0, column=0, columnspan=3)
 
         # Power Control Slider
-        self.power_control = ScaledSlider(self, 'Power Control')
+        self.power_control = ScaledSlider(self, ' Power Control')
         self.power_control.grid(row=1, column=0, rowspan=40, sticky='nsew')
 
         # Button Panel
@@ -102,11 +102,12 @@ class Throttle(ttk.Frame):
         self.start_daemon();
 
     def start_daemon(self):
+        """This daemon will collect speed information from the throttle board."""
         x = threading.Thread(target=self.poll_speed, daemon=True)
         x.start()
 
     def poll_speed(self):
-        """This function regularly polls the board for current power setting.
+        """This function regularly polls the board for current speed setting.
 
         Note that internally we use 0-200 but the scale slider uses 0-100, hence the divide by 2."""
 
@@ -115,10 +116,10 @@ class Throttle(ttk.Frame):
             sleep(0.1)
             reg, speed = self.parent.i2c_comm.read_register(self.throttle_address, speed_reg, tcc.I2C_REG_ID_LEN + tcc.I2C_DT_SPEED_LEN)
             if reg > 0:
-                self.power_setting(speed[0]/2)
+                self.speed_setting(speed[0]/2)
 
-    def power_setting(self, value):
-        """Power setting has changed. This change is reported by poll_speed() running on a different thread.
+    def speed_setting(self, value):
+        """Speed setting has changed. This change was reported by poll_speed() running on a different thread.
 
         :param value: current value (0-100)
         :return: None
@@ -179,6 +180,14 @@ class Throttle(ttk.Frame):
         else:
             self.parent.i2c_comm.write_register_verify(self.throttle_address, momentum_reg, [tcc.MOMENTUM_DISABLED])
 
+    def execute_stop(self):
+        # update the power control so it doesn't jack the power back up
+        self.power_control.set_scale(0)
+
+        emergency_stop_reg = tcc.I2C_REG_DT_EMERGENCY_STOP + (tcc.DT_THROTTLE_ALLOCATION * self.throttle_instance)
+
+        self.parent.i2c_comm.write_register_verify(self.throttle_address, emergency_stop_reg, [tcc.STOP_ACTIVATED])
+
     def shutDown(self):
         self.power_state('off')
 
@@ -238,6 +247,27 @@ class ButtonPanel(ttk.Frame):
         self.direction_but = ttk.Button(self, command=self.direction_but_pressed)
         self.config_direction('disabled')
         self.direction_but.grid(row=row, column=col)
+        row += 1
+
+        # Spacer - Todo - clean this up
+        ttk.Label(self, text="", width=18, style='MediumGray.TLabel').grid(row=row, column=col)
+        row += 1
+        ttk.Label(self, text="", width=18, style='MediumGray.TLabel').grid(row=row, column=col)
+        row += 1
+        ttk.Label(self, text="", width=18, style='MediumGray.TLabel').grid(row=row, column=col)
+        row += 1
+        ttk.Label(self, text="", width=18, style='MediumGray.TLabel').grid(row=row, column=col)
+        row += 1
+        ttk.Label(self, text="", width=18, style='MediumGray.TLabel').grid(row=row, column=col)
+        row += 1
+
+        # Button - Stop Sign
+        self.stop_button = ttk.Button(self, command=self.stop_but_pressed)
+        self.stop_button.image = tk.PhotoImage(file=tcc.stop_sign_file)
+        self.stop_button["image"] = self.stop_button.image
+        self.config_stop('disabled')
+        self.stop_button.grid(row=row, column=col)
+
 
     def master_power_but_pressed(self):
         if self.power_on:
@@ -290,7 +320,6 @@ class ButtonPanel(ttk.Frame):
 
     def direction_but_pressed(self):
         """User has pressed the direction button
-
         :return:
         """
         if self.power_on:
@@ -318,6 +347,15 @@ class ButtonPanel(ttk.Frame):
             self.direction_but.config(text='REV')
             self.direction_but.config(state='normal')
 
+    def stop_but_pressed(self):
+        self.throttle_frame.execute_stop()
+
+    def config_stop(self, state):
+        """Stop button states are 'enabled' and 'disabled'
+
+        Todo - try to make the image look diffent when disabled
+        """
+        pass
 
 class ScaledSlider(ttk.Frame):
     def __init__(self, throttle_frame, title, tracking_only=False, **kwargs):
@@ -342,7 +380,7 @@ class ScaledSlider(ttk.Frame):
         row = 0
         self.title = ttk.Label(self,
                                text=title,
-                               font=("TkDefaultFont", tcc.med_large_text, "bold"),
+                               font=("TkDefaultFont", tcc.large_text, "bold"),
                                padding=('1m', '1m', '1m', '3m'))  # below text
         self.title.grid(row=row, column=0, columnspan=2)
         row += 1
@@ -370,8 +408,12 @@ class ScaledSlider(ttk.Frame):
 
         self.scale.grid(row=row+2, column=1, rowspan=11)
 
+    def set_scale(self, new_setting):
+        """Used to force the scale value"""
+        self.scale.set(new_setting)
+
     def scale_updated(self, event):
-        """User has moved slider. Get the value and sent it up.
+        """User has moved slider. Get the value and send it up.
 
         Note that the scale slider uses 0-100 but internally we use 0-200
 

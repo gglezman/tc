@@ -10,41 +10,53 @@
 
 # the following section contains constants for the GUI
 
-SMALL_SCREEN = 0
-if SMALL_SCREEN:
+SCREEN_SIZE = "LARGE"
+
+if SCREEN_SIZE == "SMALL":
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 400
-else:
-    SCREEN_WIDTH = 1024
-    SCREEN_HEIGHT = 600
-
-if SCREEN_HEIGHT > 400:
-
-    small_text = 8
-    med_text = 10
-    med_large_text = 12
-    large_text = 16
-    extra_large = 18
-    title_padding = 5
-    tab_padding = 3
-    slider_proportion = .76              # percentage of height for slider
-    scale_slider_padding = (8, 5, 10)    # spacing around slider title
-    # print('Large screen detected')
-else:
     small_text = 7
     med_text = 9
     med_large_text = 10
-    large_text = 14
-    extra_large = 16
+    large_text = 11
+    extra_large = 13
     title_padding = 0
     tab_padding = 1
     slider_proportion = .70
     scale_slider_padding = (8, 3, 10)
-    # print('small screen detected')
+    stop_sign_file="stop_sign_50_50.png"
+elif SCREEN_SIZE == "MEDIUM":
+    SCREEN_WIDTH = 1024
+    SCREEN_HEIGHT = 600
+    small_text = 8
+    med_text = 10
+    med_large_text = 12
+    large_text = 14
+    extra_large = 16
+    title_padding = 5
+    tab_padding = 3
+    slider_proportion = .76              # percentage of height for slider
+    scale_slider_padding = (8, 5, 10)    # spacing around slider title
+    stop_sign_file="stop_sign_50_50.png"
+elif SCREEN_SIZE == "LARGE":
+    SCREEN_WIDTH = 1310
+    SCREEN_HEIGHT = 747
+    small_text = 10
+    med_text = 12
+    med_large_text = 14
+    large_text = 18
+    extra_large = 22
+    title_padding = 5
+    tab_padding = 3
+    slider_proportion = .76              # percentage of height for slider
+    scale_slider_padding = (8, 5, 10)    # spacing around slider title
+    stop_sign_file="stop_sign_74_74.png"
 
-# See I2C register definitions. The following are the I2C register assignments (and register length)
-# for each of the supported I2C registers. For example, the WRITE_SEQ_NUM register is assigned address 19
-# and it is 1 byte in length.
+# ############################################################################
+# See I2C register definitions. The following are the I2C register assignments
+# (and register length) for each of the supported I2C registers. For example,
+# the WRITE_SEQ_NUM register is assigned address 19 and it is 1 byte in length.
+# ############################################################################
 
 # Note this information must match that used by the Arduinos
 
@@ -59,8 +71,9 @@ I2C_I2C_ADR_LEN = 1
 
 I2C_REG_BOARD_TYPE = 2
 I2C_BOARD_TYPE_LEN = 1
+
 # Board type definitions
-BOARD_TYPE_THROTTLE = 2      # todo - change back to 1 !!!
+BOARD_TYPE_THROTTLE = 1
 BOARD_TYPE_SWITHCING = 2
 BOARD_TYPE_LIGHTING = 3
 
@@ -82,9 +95,12 @@ I2C_WRITE_TEST_LEN = 3
 I2C_REG_UP_COUNTER = 16
 I2C_UP_COUNTER_LEN = 1
 
+# ############################################################################
 # Checksum failure register. This is a counter which is incremented each time
-# a checksum is detected in the received data AT the Arduino. The top level controller
-# can read this register to determine how many checksum failures have occurred
+# a checksum is detected in the received data AT the Arduino. The top level
+# controller can read this register to determine how many checksum failures
+# have occurred
+# ############################################################################
 I2C_REG_I2C_WRITE_CHKSUM_FAILURE = 18
 I2C_I2C_WRITE_CHKSUM_FAILURE_LEN = 2
 
@@ -129,3 +145,4 @@ I2C_DT_SPEED_LEN = 1
 
 I2C_REG_DT_EMERGENCY_STOP = DT_THROTTLE_BASE + 5      # A: 35, B:55
 I2C_DT_EMERGENCY_STOP_LEN = 1
+STOP_ACTIVATED = 1
