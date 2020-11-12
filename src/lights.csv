@@ -1,0 +1,20 @@
+type,pins,text,off_setting,full_setting,low_setting,medium_setting
+simple,0,Pizzeria, 0,100
+fourway,"1,2",Hardware Store, 0, 100, 33,66
+fourway,3,Bike Shop, 0, 100, 33, 66
+slider,4,Brookline Station Platform North, 0, 100, 33, 66
+slider,5,Brookline Station Platform South,0,100, 33, 66
+slider,6,Brookline Station Interior, 0, 100, 33, 66
+simple,7,Riverview Hospital, 0, 100
+simple,14, Spare,0,100
+simple,18, Last in right Column,0,100
+simple,8,Park Ave West, 0, 100
+simple,9,Park Ave East, 0, 100
+simple,10,Main Street North, 0, 100
+simple,11,Main Street South, 0, 100
+simple,12,Broadway, 0, 100
+simple,13,Southern Boulvard, 0, 100
+simple,15,Spare,0,100
+simple,16,Spare,0,100
+simple,17,Last on right,0,100
+

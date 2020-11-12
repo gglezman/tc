@@ -19,8 +19,6 @@ DISABLED_COLOR = 'gray75'
 GRAY_BACKGROUND = 'gray75'
 GRAY_BORDER = 'gray72'
 
-
-# TODO - clean this out of unused styles
 def set_styles():
 
     s = ttk.Style()
@@ -28,13 +26,13 @@ def set_styles():
     ##############################
     # Notebook Styles
     ##############################
-    s.configure('TNotebook.Tab', justify='center')  # no effect
-    s.configure('TNotebook.Tab', relief=tk.SUNKEN)  # no effect
-    # s.configure('TNotebook.Frame', padding=3)     # no effect
-    s.configure('TNotebook.Tab', underline=3)       # no effect
-    # s.theme_settings("default", {"TNotebook.Tab": {"configure": {"padding": [5, 5]}}})
-    s.configure('TNotebook.Tab', padding=(5, 5))
-    s.configure('TNotebook.Tab', width=20)
+    #s.configure('TNotebook.Tab', justify='center')  # no effect
+    #s.configure('TNotebook.Tab', relief=tk.SUNKEN)  # no effect
+    ## s.configure('TNotebook.Frame', padding=3)     # no effect
+    #s.configure('TNotebook.Tab', underline=3)       # no effect
+    ## s.theme_settings("default", {"TNotebook.Tab": {"configure": {"padding": [5, 5]}}})
+    #s.configure('TNotebook.Tab', padding=(5, 5))
+    #s.configure('TNotebook.Tab', width=20)
 
     ###########################################
     # Scale Styles
@@ -53,6 +51,35 @@ def set_styles():
           background=[('!disabled', 'brown')],
           troughcolor=[('!disabled', ACTIVE_COLOR)])
 
+    s.configure('LightsOff.Horizontal.TScale',
+                borderwidth=5,  # works - trough border
+                troughcolor='lime green',  # works
+                sliderthickness=40,  # thickness of horizontal slider
+                sliderrelief=tk.RAISED,  # works
+                background='green',  # works - slider color
+                )
+    s.configure('LightsLow.Horizontal.TScale',
+                borderwidth=5,  # works - trough border
+                troughcolor='salmon',  # works
+                sliderthickness=40,  # thickness of horizonatl slider
+                sliderrelief=tk.RAISED,  # works
+                background='salmon',  # works - slider color
+                )
+    s.configure('LightsMed.Horizontal.TScale',
+                borderwidth=5,  # works - trough border
+                troughcolor='tomato',  # works
+                sliderthickness=40,  # thickness of horizonatl slider
+                sliderrelief=tk.RAISED,  # works
+                background='tomato',  # works - slider color
+                )
+    s.configure('LightsFull.Horizontal.TScale',
+                borderwidth=5,  # works - trough border
+                troughcolor='red',  # works
+                sliderthickness=30,  # thickness of horizonatl slider
+                sliderrelief=tk.RAISED,  # works
+                background='red',  # works - slider color
+                )
+
     ##############################
     # Label Styles
     ##############################
@@ -69,7 +96,8 @@ def set_styles():
     s.configure('Active.TLabel', background=ACTIVE_COLOR)
     s.configure('Disabled.TLabel', background=DISABLED_COLOR)
     s.configure('MediumGray.TLabel',font=("Helvetica", tcc.large_text, "normal"), background=GRAY_BACKGROUND)
-    s.configure("Bigger.TLabel", font=("TkDefaultFont", 14, "normal"))
+    s.configure('DarkGray.TLabel',font=("Helvetica", tcc.large_text, "normal"), background=GRAY_BORDER)
+    s.configure("Bigger.TLabel", font=("TkDefaultFont", tcc.med_large_text, "normal"))
 
     ##############################
     # Frame Styles
@@ -82,17 +110,42 @@ def set_styles():
     ##############################
     # Button Styles
     ##############################
-    #s.configure('BiggerText.TButton', font=("Helvetica", 12, "normal"))
-    s.configure('Gray.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray75', padding=10)
-    s.configure('Yellow.TButton', font=("Helvetica", tcc.med_text, "normal"), background='yellow', padding=10)
-    s.configure('Red.TButton', font=("Helvetica", tcc.med_text, "normal"), background='red', padding=10)
-    s.configure('LimeGreen.TButton', font=("Helvetica", tcc.med_text, "normal"), background='lime Green', padding=10)
-    s.configure('Wheat1.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat1', padding=10)
-    s.configure('Wheat3.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat3', padding=10)
+    s.configure('DarkGray.TButton', font=("Helvetica", tcc.med_text, "normal"), background='GRAY_BORDER', padding=8)
+    s.configure('Gray.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray75', padding=8)
+
+    # #######################
+    # Lights Panel
+    # #######################
+    s.configure('LightsReady.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray75', padding=10, borderwidth = 5)
+
+    s.configure('LightsOff.TButton', font=("Helvetica", tcc.med_text, "normal"), background='lime Green',padding=10, borderwidth=5)
+    s.map("LightsOff.TButton", background=[('active', 'lime green')])
+
+    s.configure('LightsOnLow.TButton', font=("Helvetica", tcc.med_text, "normal"), background='salmon', padding=10, borderwidth=5)
+    s.map("LightsOnLow.TButton", background=[('active', 'salmon')])
+
+    s.configure('LightsOnMed.TButton', font=("Helvetica", tcc.med_text, "normal"), background='tomato', padding=10, borderwidth=5)
+    s.map("LightsOnMed.TButton", background=[('active', 'tomato')])
+
+    s.configure('LightsOnFull.TButton', font=("Helvetica", tcc.med_text, "normal"), background='red', padding=10, borderwidth=5)
+    s.map("LightsOnFull.TButton", background=[('active', 'red')])
+
+    # #######################
+    # Throttle Panel
+    # #######################
+    s.configure('Yellow.TButton', font=("Helvetica", tcc.med_text, "normal"), background='yellow', padding=8, borderwidth=5)
     s.map("Yellow.TButton", background=[('active', 'yellow')])
+
+    s.configure('Red.TButton', font=("Helvetica", tcc.med_text, "normal"), background='red', padding=8, borderwidth=5)
     s.map("Red.TButton", background=[('active', 'red')])
+
+    s.configure('LimeGreen.TButton', font=("Helvetica", tcc.med_text, "normal"), background='lime Green',padding=8, borderwidth=5)
     s.map("LimeGreen.TButton", background=[('active', 'lime green')])
+
+    s.configure('Wheat1.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat1', padding=8, borderwidth=5)
     s.map("Wheat1.TButton", background=[('active', 'wheat1')])
+
+    s.configure('Wheat3.TButton', font=("Helvetica", tcc.med_text, "normal"), background='wheat3', padding=8, borderwidth=5)
     s.map("Wheat3.TButton", background=[('active', 'wheat3')])
 
     ##############################

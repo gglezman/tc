@@ -14,10 +14,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tc_constants as tcc
 from throttle import ThrottleTab
+from lights import LightsTab
+from switches import SwitchesTab
 from inventory import InventoryTab
 from raspArduinoTest import RaspArduinoTestTab
 import tc_styles
 
+LIGHTS_FILE="lights.csv"
 
 class TcGui:
     def __init__(self, i2c_comm):
@@ -43,25 +46,21 @@ class TcGui:
         # file the entire window
         self.notebook.pack(fill=tk.BOTH, expand=1)
 
-        # create the tabs
-        self.frameS = ttk.Frame(self.notebook, relief=tk.RIDGE)   # TODO These two will go away when I write
-        self.frameL = ttk.Frame(self.notebook, relief=tk.RIDGE)   # classes for their respective pages
-
         # padding -> around the frame when the tab is selected
         self.throttleTab = ThrottleTab(self.notebook, i2c_comm, relief=tk.RIDGE)
         self.notebook.add(self.throttleTab, text="Throttle", padding=tcc.tab_padding)
 
-        self.notebook.add(self.frameS, text="Switches", padding=tcc.tab_padding)
-        self.notebook.add(self.frameL, text="Lights", padding=tcc.tab_padding)
+        self.switchesTab = SwitchesTab(self.notebook, i2c_comm, relief=tk.RIDGE)
+        self.notebook.add(self.switchesTab, text="Switches", padding=tcc.tab_padding)
+
+        self.lightsTab = LightsTab(self.notebook, LIGHTS_FILE, i2c_comm, relief=tk.RIDGE)
+        self.notebook.add(self.lightsTab, text="Lights", padding=tcc.tab_padding)
 
         self.inventoryTab = InventoryTab(self, self.notebook, relief=tk.RIDGE)
         self.notebook.add(self.inventoryTab, text="Inventory", padding=tcc.tab_padding)
 
         self.raspArduinoTestTab = RaspArduinoTestTab(self, self.notebook, self.root, self.i2c_comm, relief=tk.RIDGE)
         self.notebook.add(self.raspArduinoTestTab, text="Test", padding=tcc.tab_padding)
-
-        self.fill_switches_frame(self.frameS)
-        self.fill_lights_frame(self.frameL)
 
     def run(self):
         """Run the GUI
@@ -86,12 +85,6 @@ class TcGui:
         self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))
 
         self.root.mainloop()
-
-    def fill_switches_frame(self, switches_frame):
-        None
-
-    def fill_lights_frame(self, lights_frame):
-        None
 
     def collect_inventory(self):
         """Use the I2C_Comm services to collect inventory information.

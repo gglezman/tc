@@ -40,7 +40,7 @@ elif SCREEN_SIZE == "MEDIUM":
     stop_sign_file="stop_sign_50_50.png"
 elif SCREEN_SIZE == "LARGE":
     SCREEN_WIDTH = 1310
-    SCREEN_HEIGHT = 747
+    SCREEN_HEIGHT = 740
     small_text = 10
     med_text = 12
     med_large_text = 14
