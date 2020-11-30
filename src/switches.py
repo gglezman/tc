@@ -25,3 +25,6 @@ class SwitchesTab(ttk.Frame):
         self.i2c_comm = i2c_comm
 
         ttk.Frame.__init__(self, master, style='DarkGray.TFrame', **kwargs)
+
+    def update_inventory(self):
+        pass

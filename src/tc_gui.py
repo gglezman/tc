@@ -68,6 +68,7 @@ class TcGui:
         """
         self.board_inventory = self.collect_inventory()
         self.throttleTab.update_inventory(self.board_inventory)
+        self.lightsTab.update_inventory(self.board_inventory)
         self.inventoryTab.update_inventory(self.board_inventory)
         self.raspArduinoTestTab.update_inventory(self.board_inventory)
 

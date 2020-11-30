@@ -12,7 +12,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import csv
-import threading
+from time import sleep
 import tc_constants as tcc
 
 INVALID_PIN = "99"
@@ -27,6 +27,7 @@ class LightsTab(ttk.Frame):
         :param kwargs:
         """
         self.i2c_comm = i2c_comm
+        self.lights_control_address = 0
 
         # ##################################################################
         # open the Lights config file to determine what the user wants
@@ -72,30 +73,39 @@ class LightsTab(ttk.Frame):
             instance += 1
 
         # ##################################################
-        # Add the All On/Off Button - center it
+        # Add the "All On/Off" Button - center it
         # ##################################################
         all_frame = ttk.Frame(self,style='DarkGray.TFrame',padding=(60,20))
 
         all_frame.grid(row=max_row+2,column=3,columnspan=4, sticky='w')
         AllLightsButton(all_frame, 1, 1, switch_objects)
 
+    def update_inventory(self, inventory):
+        for entry in inventory:
+            if entry['boardType'] == tcc.BOARD_TYPE_LIGHTS:
+                self.lights_control_address = entry['i2cAddress']
+
     def button_pressed(self, pins, power_level):
+        """One of the switches has been depressed. Communicate it to the board controller.
+        Sed the pin number and the new power level.
+        """
         for pin in pins:
-            if pin == INVALID_PIN:
-                if power_level == 0:
-                    print("all OFF")
-                else:
-                    print("ALL ON")
-            else:
+            if pin != INVALID_PIN:
                 print("Pin {} to power level {}".format(pin,power_level))
+                self.i2c_comm.write_register_verify(self.lights_control_address,
+                                                     tcc.I2C_REG_LIGHT_POWER_LEVEL,
+                                                     [int(pin), int(power_level)])
+            else:
+                print("Invalid pin number detected in button_pressed")
+
 
 class SimpleLight:
     def __init__(self, frame, row, col, light_switch, **kwargs ):
 
         self.frame = frame
         self.instance = row*col
-        self.off = int(light_switch['off_setting'])
-        self.full = int(light_switch['full_setting'])
+        self.off_level = int(light_switch['off_setting'])
+        self.full_level = int(light_switch['full_setting'])
         self.pins = light_switch['pins'].split(',')
 
         self.state = 'off'
@@ -121,7 +131,7 @@ class SimpleLight:
             self.off_button.config(style='LightsOff.TButton')
             self.on_button.config(style='LightsReady.TButton')
 
-            self.frame.button_pressed(self.pins, self.off)
+            self.frame.button_pressed(self.pins, self.off_level)
 
     def on_button_pressed(self):
         if self.state == 'off':
@@ -129,17 +139,17 @@ class SimpleLight:
             self.off_button.config(style='LightsReady.TButton')
             self.on_button.config(style='LightsOnFull.TButton', text='ON')
 
-            self.frame.button_pressed(self.pins, self.full)
+            self.frame.button_pressed(self.pins, self.full_level)
 
 class FourWayLight:
     def __init__(self, frame, row, col, light_switch, **kwargs ):
 
         self.frame = frame
         self.instance = row*col
-        self.off = int(light_switch['off_setting'])
-        self.low = int(light_switch['low_setting'])
-        self.med = int(light_switch['medium_setting'])
-        self.full = int(light_switch['full_setting'])
+        self.off_level = int(light_switch['off_setting'])
+        self.low_level = int(light_switch['low_setting'])
+        self.med_level = int(light_switch['medium_setting'])
+        self.full_level = int(light_switch['full_setting'])
         self.pins = light_switch['pins'].split(',')
 
         self.state = 'off'
@@ -166,43 +176,43 @@ class FourWayLight:
             self.off_button.config(style='LightsOff.TButton', text='OFF')
             self.on_button.config(style='LightsReady.TButton', text='ON')
 
-            self.frame.button_pressed(self.pins, self.off)
+            self.frame.button_pressed(self.pins, self.off_level)
 
     def on_button_pressed(self):
         if self.state == 'off':
             self.state = 'low'
             self.on_button.config(style='LightsOnLow.TButton', text='LOW')
             self.off_button.config(style='LightsReady.TButton', text='OFF')
-            self.frame.button_pressed(self.pins, self.low)
+            self.frame.button_pressed(self.pins, self.low_level)
         elif self.state == 'low':
             self.direction = 'up'
             self.state = 'medium'
             self.on_button.config(style='LightsOnMed.TButton', text='MED')
-            self.frame.button_pressed(self.pins, self.med)
+            self.frame.button_pressed(self.pins, self.med_level)
         elif self.state == 'medium':
             if self.direction == 'up':
                 self.state = 'high'
                 self.on_button.config(style='LightsOnFull.TButton', text='FULL')
-                self.frame.button_pressed(self.pins, self.full)
+                self.frame.button_pressed(self.pins, self.full_level)
             else:
                 self.state = 'low'
                 self.on_button.config(style='LightsOnLow.TButton', text='LOW')
-                self.frame.button_pressed(self.pins, self.low)
+                self.frame.button_pressed(self.pins, self.low_level)
         elif self.state == 'high':
             self.state = 'medium'
             self.direction = 'down'
             self.on_button.config(style='LightsOnMed.TButton', text='MED')
-            self.frame.button_pressed(self.pins, self.med)
+            self.frame.button_pressed(self.pins, self.med_level)
 
 class SliderLight:
     def __init__(self,frame, row, col, light_switch, **kwargs ):
 
         self.frame = frame
         self.instance = row*col
-        self.off = int(light_switch['off_setting'])
-        self.low = int(light_switch['low_setting'])
-        self.med = int(light_switch['medium_setting'])
-        self.full = int(light_switch['full_setting'])
+        self.off_level = int(light_switch['off_setting'])
+        self.low_level = int(light_switch['low_setting'])
+        self.med_level = int(light_switch['medium_setting'])
+        self.full_level = int(light_switch['full_setting'])
         self.pins = light_switch['pins'].split(',')
 
         col = col
@@ -223,13 +233,13 @@ class SliderLight:
 
     def scale_updated(self, event):
         new_level = int(self.level.get())
-        if new_level <= self.off:
+        if new_level <= self.off_level:
             self.level.config(style='LightsOff.Horizontal.TScale')
             self.frame.button_pressed(self.pins, new_level)
-        elif new_level <= self.low:
+        elif new_level <= self.low_level:
             self.level.config(style='LightsLow.Horizontal.TScale')
             self.frame.button_pressed(self.pins, new_level)
-        elif new_level <= self.med:
+        elif new_level <= self.med_level:
             self.level.config(style='LightsMed.Horizontal.TScale')
             self.frame.button_pressed(self.pins, new_level)
         else:
@@ -237,18 +247,18 @@ class SliderLight:
             self.frame.button_pressed(self.pins, new_level)
 
     def on_button_pressed(self):
-        """This is activated when the ALL on button is pressed"""
+        """This is activated when the ALL ON button is pressed"""
         current_level = int(self.level.get())
-        if current_level <= self.off:
-            self.level.set(self.low)
-        elif current_level <= self.low:
-            self.level.set(self.med)
-        elif current_level <= self.med:
-            self.level.set(self.full)
+        if current_level <= self.off_level:
+            self.level.set(self.low_level)
+        elif current_level <= self.low_level:
+            self.level.set(self.med_level)
+        elif current_level <= self.med_level:
+            self.level.set(self.full_level)
         self.scale_updated(0)
 
     def off_button_pressed(self):
-            """This is activated when the ALL on button is pressed"""
+            """This is activated when the ALL OFF button is pressed"""
             self.level.set(0)
             self.scale_updated(0)
 
@@ -259,9 +269,6 @@ class AllLightsButton:
         self.frame = frame
         self.instance = row*col
         self.switch_objects = switch_objects
-        #self.off = int(light_switch['off_setting'])
-        #self.full = int(light_switch['full_setting'])
-        #self.pins = light_switch['pins'].split(',')
 
         self.state = 'off'
 
@@ -288,6 +295,9 @@ class AllLightsButton:
 
         for object in self.switch_objects:
             object.off_button_pressed()
+            # avoid overrunning buffers in the board controller
+            sleep(.004)
+
 
     def on_button_pressed(self):
         #if self.state == 'off':
@@ -297,3 +307,5 @@ class AllLightsButton:
 
         for object in self.switch_objects:
             object.on_button_pressed()
+            # avoid overrunning buffers in the board controller
+            sleep(.004)

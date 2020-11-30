@@ -74,8 +74,8 @@ I2C_BOARD_TYPE_LEN = 1
 
 # Board type definitions
 BOARD_TYPE_THROTTLE = 1
-BOARD_TYPE_SWITHCING = 2
-BOARD_TYPE_LIGHTING = 3
+BOARD_TYPE_SWITCHING = 2
+BOARD_TYPE_LIGHTS = 3
 
 I2C_REG_BOARD_DESCRIPTION = 3
 I2C_BOARD_DESCRIPTION_LEN = 16
@@ -112,11 +112,9 @@ I2C_APP_SW_VERSION_LEN = 9
 
 # All transmissions include a 1 byte checksum
 I2C_CHECKSUM_LEN = 1
+
 # ################################################
-#  I2C Register map for this application
-#
-#  Define all register assignments specific to
-#  the application here.
+#  I2C Register map for the Throttle application
 # #################################################
 
 DT_THROTTLE_BASE = 30
@@ -146,3 +144,10 @@ I2C_DT_SPEED_LEN = 1
 I2C_REG_DT_EMERGENCY_STOP = DT_THROTTLE_BASE + 5      # A: 35, B:55
 I2C_DT_EMERGENCY_STOP_LEN = 1
 STOP_ACTIVATED = 1
+
+# ################################################
+#  I2C Register map for the Lights application
+# #################################################
+
+I2C_REG_LIGHT_POWER_LEVEL = 150
+I2C_LIGHT_POWER_LEVEL_LEN = 2
