@@ -265,6 +265,9 @@ class SliderLight:
 
 class AllLightsButton:
     def __init__(self, frame, row, col, switch_objects, **kwargs ):
+        """Put up a button for all lights on and off
+
+        The switch_objects list passed in allows access to control all other lights"""
 
         self.frame = frame
         self.instance = row*col
@@ -288,8 +291,6 @@ class AllLightsButton:
         label.grid(row=row, column=col, sticky=('W'), padx=6)
 
     def off_button_pressed(self):
-        #if self.state == 'on':
-        #    self.state = 'off'
         self.off_button.config(style='LightsOff.TButton')
         self.on_button.config(style='LightsReady.TButton')
 
@@ -300,8 +301,6 @@ class AllLightsButton:
 
 
     def on_button_pressed(self):
-        #if self.state == 'off':
-        #    self.state = 'on'
         self.off_button.config(style='LightsReady.TButton')
         self.on_button.config(style='LightsOnFull.TButton', text='ON')
 
