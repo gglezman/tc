@@ -18,6 +18,12 @@ ACTIVE_COLOR = 'DeepSkyBlue2'
 DISABLED_COLOR = 'gray75'
 GRAY_BACKGROUND = 'gray75'
 GRAY_BORDER = 'gray72'
+MYLIMEGREEN = '#32c032'
+TRACK_COLOR = 'green'
+TRACK_IDENTIFY_COLOR = 'white'
+THRU_ACTIVE_COLOR = MYLIMEGREEN
+DIV_ACTIVE_COLOR = MYLIMEGREEN
+DIV_INACTIVE_COLOR = 'gray'
 
 def set_styles():
 
@@ -53,7 +59,8 @@ def set_styles():
 
     s.configure('LightsOff.Horizontal.TScale',
                 borderwidth=5,  # works - trough border
-                troughcolor='lime green',  # works
+                troughcolor=MYLIMEGREEN,  # works
+                #troughcolor='lime green',  # works
                 sliderthickness=40,  # thickness of horizontal slider
                 sliderrelief=tk.RAISED,  # works
                 background='green',  # works - slider color
@@ -118,7 +125,7 @@ def set_styles():
     # #######################
     s.configure('LightsReady.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray75', padding=10, borderwidth = 5)
 
-    s.configure('LightsOff.TButton', font=("Helvetica", tcc.med_text, "normal"), background='lime Green',padding=10, borderwidth=5)
+    s.configure('LightsOff.TButton', font=("Helvetica", tcc.med_text, "normal"), background=MYLIMEGREEN,padding=10, borderwidth=5)
     s.map("LightsOff.TButton", background=[('active', 'lime green')])
 
     s.configure('LightsOnLow.TButton', font=("Helvetica", tcc.med_text, "normal"), background='salmon', padding=10, borderwidth=5)
@@ -129,6 +136,24 @@ def set_styles():
 
     s.configure('LightsOnFull.TButton', font=("Helvetica", tcc.med_text, "normal"), background='red', padding=10, borderwidth=5)
     s.map("LightsOnFull.TButton", background=[('active', 'red')])
+
+    # #######################
+    # Switch Panel
+    # #######################
+    s.configure('ThruActive.TButton', font=("Helvetica", tcc.med_text, "normal"), background=THRU_ACTIVE_COLOR, padding=10)
+    s.map("ThruActive.TButton", background=[('active', THRU_ACTIVE_COLOR)])
+    s.configure('ThruInactive.TButton', font=("Helvetica", tcc.med_text, "normal"), background='gray', padding=10)
+    s.map("ThruInactive.TButton", background=[('active', 'gray')])
+
+    s.configure('DivertActive.TButton', font=("Helvetica", tcc.med_text, "normal"), background=DIV_ACTIVE_COLOR, padding=10)
+    s.map("DivertActive.TButton", background=[('active', DIV_ACTIVE_COLOR)])
+    s.configure('DivertInactive.TButton', font=("Helvetica", tcc.med_text, "normal"), background=DIV_INACTIVE_COLOR, padding=10)
+    s.map("DivertInactive.TButton", background=[('active', DIV_INACTIVE_COLOR)])
+
+    s.configure('Name.TButton', font=("Helvetica", tcc.med_text, "normal"), background=GRAY_BORDER, padding=10, relief=tk.FLAT)
+    s.map("Name.TButton", background=[('active', GRAY_BORDER)])
+    s.configure('NameActive.TButton', font=("Helvetica", tcc.med_text, "normal"), background='white', padding=10)
+    s.map("NameActive.TButton", background=[('active', 'white')])
 
     # #######################
     # Throttle Panel

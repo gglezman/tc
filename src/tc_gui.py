@@ -73,17 +73,21 @@ class TcGui:
         self.raspArduinoTestTab.update_inventory(self.board_inventory)
 
         # get screen width and height
-        #ws = self.root.winfo_screenwidth()  # width of the screen
-        #hs = self.root.winfo_screenheight()  # height of the screen
+        ws = self.root.winfo_screenwidth()  # width of the screen
+        hs = self.root.winfo_screenheight()  # height of the screen
 
         # calculate x and y coordinates for the Tk root window
         #x = int((ws / 2) - (tcc.SCREEN_WIDTH / 2))
         #y = int((hs / 2) - (tcc.SCREEN_HEIGHT / 2))
-        x = 0
-        y = 0
+        x = 1   # if I use (0,0) I end up in the middle of the display !!
+        y = 1
         # set the dimensions of the screen and where it is placed
 
-        self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))
+        #self.root.geometry('{}x{}+{}+{}'.format(tcc.SCREEN_WIDTH, tcc.SCREEN_HEIGHT, x, y))
+        # todo - should I define the width of the screen or use what the actual size is ??
+        #        how does this effect all my other size selections
+        print('{}x{}+{}+{}'.format(ws, hs, x, y))
+        self.root.geometry('{}x{}+{}+{}'.format(ws, hs, x, y))
 
         self.root.mainloop()
 
